@@ -1,42 +1,42 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 
-from paiargparse.dataclass_meta import dc_meta
+from paiargparse.dataclass_meta import dc_meta, pai_dataclass
 
 
-@dataclass
+@pai_dataclass
 class Level2:
     p1: int = 0
 
 
-@dataclass
+@pai_dataclass
 class Level2a(Level2):
     p1a: float = 0.1
 
 
-@dataclass
+@pai_dataclass
 class Level2b(Level2):
     pb: bool = True
 
 
-@dataclass
+@pai_dataclass
 class Level1:
     p1: int = 0
     p2: float = 0.2
     l: Level2 = field(default_factory=Level2)
 
 
-@dataclass
+@pai_dataclass
 class Level1b:
     p1: int
     p2: str = ''
 
 
-@dataclass
+@pai_dataclass
 class TestMetaLevel2:
     p: str = field(default='', metadata=dc_meta(separator='+'))
 
 
-@dataclass
+@pai_dataclass
 class TestMetaLevel1:
     p: int = 0
     sub: TestMetaLevel2 = field(default_factory=TestMetaLevel2, metadata=dc_meta(
