@@ -1,0 +1,902 @@
+kind: pipeline
+type: docker
+name: full_pipeline
+steps:
+- name: prepare
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - mkdir logs
+  - virtualenv -p python3 /root/venv
+  - wget https://bootstrap.pypa.io/get-pip.py && /root/venv/bin/python3 get-pip.py
+  - /root/venv/bin/pip install -U pip setuptools
+  - /root/venv/bin/pip install --use-feature 2020-resolver -r requirements.txt
+  - /root/venv/bin/python setup.py install
+- name: 'Integrity check '
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - echo $PWD
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_data_class.TestPAIParser.test_required
+    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
+    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
+    test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_data_class.TestPAIParser.test_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_single_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_required_from_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_required_from_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_setting_second_level
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_setting_second_level
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_meta.TestPAIParser.test_three_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_meta.TestPAIParser.test_three_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_multi_args.TestPAIParser.test_three_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_multi_args.TestPAIParser.test_three_dc_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc_required
+  when:
+    status:
+    - failure
+    - success
+- name: notify
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - export PYTHONPATH=$PWD
+  - git clone --depth=1 -b devel https://gitea.planet-ai.de/pai/cicd
+  - echo "The repository $DRONE_REPO_NAME/$DRONE_BRANCH has been changed and contains
+    errors." > message.txt
+  - echo "" >> message.txt
+  - echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt
+  - echo "Failed steps:" >> message.txt
+  - echo $DRONE_FAILED_STEPS | sed "s/,/\n/g" >> message.txt
+  - echo "Please check the links for more information." >> message.txt
+  - echo "Errors and changes leading to failure:" >> message.txt
+  - echo "  $CI_BUILD_LINK" >> message.txt
+  - echo "  $DRONE_BUILD_LINK" >> message.txt
+  - echo "getting username of last committers"
+  - USERNAME=$(python3 cicd/noarch/getLastCommitter.py -repo $DRONE_REPO_NAME -auth_key
+    $GIT_AUTH_KEY)
+  - echo "found username - $USERNAME"
+  - cat message.txt
+  - if [ "$USERNAME" ] ; then
+  - python3 cicd/noarch/getContacts.py -a $ADMIN_EMAIL -r $DRONE_REPO_NAME -u $USERNAME
+    -o cicd/maintainer.lst -c cicd/contact.lst -f mailto > recipients.txt
+  - else
+  - python3 cicd/noarch/getContacts.py -a $ADMIN_EMAIL -r $DRONE_REPO_NAME -o cicd/maintainer.lst
+    -c cicd/contact.lst -f mailto > recipients.txt
+  - fi
+  - echo "Sending notification to:"
+  - cat recipients.txt
+  - python3 cicd/noarch/e_mail.py -u $EMAIL_USERNAME -p $EMAIL_PASSWORD -f $FROM -t
+    `cat recipients.txt` -s "DRONE:$DRONE_REPO/$DRONE_BRANCH changed" -m message.txt
+  environment:
+    SUBJECT: Changes/Errors:$DRONE_REPO
+    ADMIN_EMAIL:
+      from_secret: DRONE_ADMIN_EMAIL
+    FROM:
+      from_secret: DRONE_EMAIL
+    EMAIL_USERNAME:
+      from_secret: DRONE_EMAIL_USERNAME
+    EMAIL_PASSWORD:
+      from_secret: DRONE_EMAIL_PASSWORD
+    GIT_AUTH_KEY:
+      from_secret: DRONE_MACHINE_USER_GITEA_KEY
+  when:
+    status:
+    - failure
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+- name: pip_cache
+  temp: {}
+- name: venv
+  temp: {}
+trigger:
+  branch:
+  - master
+  - devel
+  - fix/*
+  - issue/*
+  - run-test/*
+  event:
+  - push
+---
+kind: pipeline
+type: docker
+name: pull_request
+steps:
+- name: prepare
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - mkdir logs
+  - virtualenv -p python3 /root/venv
+  - wget https://bootstrap.pypa.io/get-pip.py && /root/venv/bin/python3 get-pip.py
+  - /root/venv/bin/pip install -U pip setuptools
+  - /root/venv/bin/pip install --use-feature 2020-resolver -r requirements.txt
+  - /root/venv/bin/python setup.py install
+- name: 'Integrity check '
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - echo $PWD
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_data_class.TestPAIParser.test_required
+    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
+    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
+    test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_data_class.TestPAIParser.test_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_single_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_required_from_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_required_from_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_setting_second_level
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_setting_second_level
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_meta.TestPAIParser.test_three_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_meta.TestPAIParser.test_three_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_multi_args.TestPAIParser.test_three_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_multi_args.TestPAIParser.test_three_dc_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc_required
+  when:
+    status:
+    - failure
+    - success
+- name: notify
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - export PYTHONPATH=$PWD
+  - git clone --depth=1 -b devel https://gitea.planet-ai.de/pai/cicd
+  - echo "The repository $DRONE_REPO_NAME/$DRONE_BRANCH has been changed and contains
+    errors." > message.txt
+  - echo "" >> message.txt
+  - echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt
+  - echo "Failed steps:" >> message.txt
+  - echo $DRONE_FAILED_STEPS | sed "s/,/\n/g" >> message.txt
+  - echo "Please check the links for more information." >> message.txt
+  - echo "Errors and changes leading to failure:" >> message.txt
+  - echo "  $CI_BUILD_LINK" >> message.txt
+  - echo "  $DRONE_BUILD_LINK" >> message.txt
+  - echo "getting username of last committers"
+  - USERNAME=$(python3 cicd/noarch/getLastCommitter.py -repo $DRONE_REPO_NAME -auth_key
+    $GIT_AUTH_KEY)
+  - echo "found username - $USERNAME"
+  - cat message.txt
+  - if [ "$USERNAME" ] ; then
+  - python3 cicd/noarch/getContacts.py -a $ADMIN_EMAIL -r $DRONE_REPO_NAME -u $USERNAME
+    -o cicd/maintainer.lst -c cicd/contact.lst -f mailto > recipients.txt
+  - else
+  - python3 cicd/noarch/getContacts.py -a $ADMIN_EMAIL -r $DRONE_REPO_NAME -o cicd/maintainer.lst
+    -c cicd/contact.lst -f mailto > recipients.txt
+  - fi
+  - echo "Sending notification to:"
+  - cat recipients.txt
+  - python3 cicd/noarch/e_mail.py -u $EMAIL_USERNAME -p $EMAIL_PASSWORD -f $FROM -t
+    `cat recipients.txt` -s "DRONE:$DRONE_REPO/$DRONE_BRANCH changed" -m message.txt
+  environment:
+    SUBJECT: Changes/Errors:$DRONE_REPO
+    ADMIN_EMAIL:
+      from_secret: DRONE_ADMIN_EMAIL
+    FROM:
+      from_secret: DRONE_EMAIL
+    EMAIL_USERNAME:
+      from_secret: DRONE_EMAIL_USERNAME
+    EMAIL_PASSWORD:
+      from_secret: DRONE_EMAIL_PASSWORD
+    GIT_AUTH_KEY:
+      from_secret: DRONE_MACHINE_USER_GITEA_KEY
+  when:
+    status:
+    - failure
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+- name: pip_cache
+  temp: {}
+- name: venv
+  temp: {}
+trigger:
+  event:
+  - pull_request
+---
+kind: pipeline
+type: docker
+name: feature_full
+steps:
+- name: prepare
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - mkdir logs
+  - virtualenv -p python3 /root/venv
+  - wget https://bootstrap.pypa.io/get-pip.py && /root/venv/bin/python3 get-pip.py
+  - /root/venv/bin/pip install -U pip setuptools
+  - /root/venv/bin/pip install --use-feature 2020-resolver -r requirements.txt
+  - /root/venv/bin/python setup.py install
+- name: 'Integrity check '
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - echo $PWD
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_data_class.TestPAIParser.test_required
+    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
+    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
+    test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_data_class.TestPAIParser.test_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_single_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_required_from_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_required_from_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_default_value.TestPAIParserDefault.test_setting_second_level
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_default_value.TestPAIParserDefault.test_setting_second_level
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_meta.TestPAIParser.test_three_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_meta.TestPAIParser.test_three_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_multi_args.TestPAIParser.test_three_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_multi_args.TestPAIParser.test_three_dc_required
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc_required
+  when:
+    status:
+    - failure
+    - success
+- name: notify
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - export PYTHONPATH=$PWD
+  - git clone --depth=1 -b devel https://gitea.planet-ai.de/pai/cicd
+  - echo "The repository $DRONE_REPO_NAME/$DRONE_BRANCH has been changed and contains
+    errors." > message.txt
+  - echo "" >> message.txt
+  - echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt
+  - echo "Failed steps:" >> message.txt
+  - echo $DRONE_FAILED_STEPS | sed "s/,/\n/g" >> message.txt
+  - echo "Please check the links for more information." >> message.txt
+  - echo "Errors and changes leading to failure:" >> message.txt
+  - echo "  $CI_BUILD_LINK" >> message.txt
+  - echo "  $DRONE_BUILD_LINK" >> message.txt
+  - echo "getting username of last committers"
+  - USERNAME=$(python3 cicd/noarch/getLastCommitter.py -repo $DRONE_REPO_NAME -auth_key
+    $GIT_AUTH_KEY)
+  - echo "found username - $USERNAME"
+  - cat message.txt
+  - if [ "$USERNAME" ] ; then
+  - python3 cicd/noarch/getContacts.py -a $ADMIN_EMAIL -r $DRONE_REPO_NAME -u $USERNAME
+    -o cicd/maintainer.lst -c cicd/contact.lst -f mailto > recipients.txt
+  - else
+  - python3 cicd/noarch/getContacts.py -a $ADMIN_EMAIL -r $DRONE_REPO_NAME -o cicd/maintainer.lst
+    -c cicd/contact.lst -f mailto > recipients.txt
+  - fi
+  - echo "Sending notification to:"
+  - cat recipients.txt
+  - python3 cicd/noarch/e_mail.py -u $EMAIL_USERNAME -p $EMAIL_PASSWORD -f $FROM -t
+    `cat recipients.txt` -s "DRONE:$DRONE_REPO/$DRONE_BRANCH changed" -m message.txt
+  environment:
+    SUBJECT: Changes/Errors:$DRONE_REPO
+    ADMIN_EMAIL:
+      from_secret: DRONE_ADMIN_EMAIL
+    FROM:
+      from_secret: DRONE_EMAIL
+    EMAIL_USERNAME:
+      from_secret: DRONE_EMAIL_USERNAME
+    EMAIL_PASSWORD:
+      from_secret: DRONE_EMAIL_PASSWORD
+    GIT_AUTH_KEY:
+      from_secret: DRONE_MACHINE_USER_GITEA_KEY
+  when:
+    status:
+    - failure
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+- name: pip_cache
+  temp: {}
+- name: venv
+  temp: {}
+trigger:
+  branch:
+  - feature/*
+  event:
+  - cron
+  cron:
+  - nightly
+---
+kind: pipeline
+type: docker
+name: feature_reduced
+steps:
+- name: prepare
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - mkdir logs
+  - virtualenv -p python3 /root/venv
+  - wget https://bootstrap.pypa.io/get-pip.py && /root/venv/bin/python3 get-pip.py
+  - /root/venv/bin/pip install -U pip setuptools
+  - /root/venv/bin/pip install --use-feature 2020-resolver -r requirements.txt
+  - /root/venv/bin/python setup.py install
+- name: 'Integrity check '
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - echo $PWD
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_data_class.TestPAIParser.test_required
+    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
+    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
+    test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: notify
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - export PYTHONPATH=$PWD
+  - git clone --depth=1 -b devel https://gitea.planet-ai.de/pai/cicd
+  - echo "The repository $DRONE_REPO_NAME/$DRONE_BRANCH has been changed and contains
+    errors." > message.txt
+  - echo "" >> message.txt
+  - echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt
+  - echo "Failed steps:" >> message.txt
+  - echo $DRONE_FAILED_STEPS | sed "s/,/\n/g" >> message.txt
+  - echo "Please check the links for more information." >> message.txt
+  - echo "Errors and changes leading to failure:" >> message.txt
+  - echo "  $CI_BUILD_LINK" >> message.txt
+  - echo "  $DRONE_BUILD_LINK" >> message.txt
+  - echo "getting username of last committers"
+  - USERNAME=$(python3 cicd/noarch/getLastCommitter.py -repo $DRONE_REPO_NAME -auth_key
+    $GIT_AUTH_KEY)
+  - echo "found username - $USERNAME"
+  - cat message.txt
+  - if [ "$USERNAME" ] ; then
+  - python3 cicd/noarch/getContacts.py -a $ADMIN_EMAIL -r $DRONE_REPO_NAME -u $USERNAME
+    -o cicd/maintainer.lst -c cicd/contact.lst -f mailto > recipients.txt
+  - else
+  - python3 cicd/noarch/getContacts.py -a $ADMIN_EMAIL -r $DRONE_REPO_NAME -o cicd/maintainer.lst
+    -c cicd/contact.lst -f mailto > recipients.txt
+  - fi
+  - echo "Sending notification to:"
+  - cat recipients.txt
+  - python3 cicd/noarch/e_mail.py -u $EMAIL_USERNAME -p $EMAIL_PASSWORD -f $FROM -t
+    `cat recipients.txt` -s "DRONE:$DRONE_REPO/$DRONE_BRANCH changed" -m message.txt
+  environment:
+    SUBJECT: Changes/Errors:$DRONE_REPO
+    ADMIN_EMAIL:
+      from_secret: DRONE_ADMIN_EMAIL
+    FROM:
+      from_secret: DRONE_EMAIL
+    EMAIL_USERNAME:
+      from_secret: DRONE_EMAIL_USERNAME
+    EMAIL_PASSWORD:
+      from_secret: DRONE_EMAIL_PASSWORD
+    GIT_AUTH_KEY:
+      from_secret: DRONE_MACHINE_USER_GITEA_KEY
+  when:
+    status:
+    - failure
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+- name: pip_cache
+  temp: {}
+- name: venv
+  temp: {}
+trigger:
+  branch:
+  - feature/*
+  event:
+  - push
