@@ -64,6 +64,7 @@ def prepare_step():
         'wget https://bootstrap.pypa.io/get-pip.py && /root/venv/bin/python3 get-pip.py',
         '/root/venv/bin/pip install -U pip setuptools',
         '/root/venv/bin/pip install --use-feature 2020-resolver -r requirements.txt',
+        '/root/venv/bin/pip install --use-feature 2020-resolver -r test_requirements.txt',
         '/root/venv/bin/python setup.py install',
     ])
 
@@ -112,7 +113,7 @@ def notify_step():
         'echo "" >> message.txt',
         'echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt',
         'echo "Failed steps:" >> message.txt',
-        'echo $DRONE_FAILED_STEPS | sed "s/,/\\n/g" >> message.txt',
+        'echo $DRONE_FAILED_STEPS | sed "s/,/\\\\n/g" >> message.txt',
         'echo "Please check the links for more information." >> message.txt',
         'echo "Errors and changes leading to failure:" >> message.txt',
         'echo "  $CI_BUILD_LINK" >> message.txt',
