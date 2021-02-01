@@ -32,8 +32,10 @@ steps:
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
     test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
     test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
-    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
-    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_default test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
+    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
+    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
     test.test_types.TestPAIParser.test_enum test.test_types.TestPAIParser.test_enum_list
@@ -154,6 +156,51 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dataclass_json.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
   when:
     status:
     - failure
@@ -412,8 +459,10 @@ steps:
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
     test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
     test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
-    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
-    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_default test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
+    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
+    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
     test.test_types.TestPAIParser.test_enum test.test_types.TestPAIParser.test_enum_list
@@ -534,6 +583,51 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dataclass_json.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
   when:
     status:
     - failure
@@ -786,8 +880,10 @@ steps:
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
     test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
     test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
-    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
-    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_default test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
+    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
+    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
     test.test_types.TestPAIParser.test_enum test.test_types.TestPAIParser.test_enum_list
@@ -908,6 +1004,51 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dataclass_json.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
   when:
     status:
     - failure
@@ -1164,8 +1305,10 @@ steps:
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
     test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
     test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
-    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
-    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_default test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default
+    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
+    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
     test.test_types.TestPAIParser.test_enum test.test_types.TestPAIParser.test_enum_list
