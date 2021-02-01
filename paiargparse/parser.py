@@ -108,15 +108,22 @@ class PAIArgumentParser(ArgumentParser):
                                             type=arg_type,
                                             choices=choices,
                                             action=setter_action(root_params[arg.name], arg),
-                                            nargs='*' if arg.list else None)
+                                            nargs=arg.meta.get('nargs', '*') if arg.list else None)
 
         def setter_action(arg: PAINodeParam, field: ArgumentField):
             class FieldSetterAction(Action):
                 def __call__(self, parser, args, values, option_string=None):
-                    if field.enum:
-                        arg.value = str_to_enum(values, field.enum, field.type)
+                    if field.list:
+                        if field.enum:
+                            arg.value = [str_to_enum(v, field.enum, field.type) for v in values]
+                        else:
+                            arg.value = values
                     else:
-                        arg.value = values
+                        if field.enum:
+                            arg.value = str_to_enum(values, field.enum, field.type)
+                        else:
+                            arg.value = values
+
             return FieldSetterAction
 
         flag = f'--{prefix}{param_name}'

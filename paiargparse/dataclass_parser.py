@@ -93,7 +93,7 @@ def extract_args_of_dataclass(dc) -> List[ArgumentField]:
 
 
 def enum_choices(enum_cls: Type[Enum]):
-    return list(enum_cls.__members__.keys()) + list(v.value for v in enum_cls.__members__.values())
+    return list(enum_cls.__members__.keys()) + list(str(v.value) for v in enum_cls.__members__.values())
 
 
 def str_to_enum(v: str, enum_cls: Type[Enum], enum_type):
