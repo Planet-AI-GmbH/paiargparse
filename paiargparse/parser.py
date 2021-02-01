@@ -5,7 +5,7 @@ from typing import Any, Dict
 import importlib
 
 from paiargparse.dataclass_meta import DEFAULT_SEPARATOR
-from paiargparse.dataclass_parser import extract_args_of_dataclass
+from paiargparse.dataclass_parser import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices
 from paiargparse.param_tree import PAINode, PAINodeParam, PAINodeDataClass
 
 
@@ -100,17 +100,23 @@ class PAIArgumentParser(ArgumentParser):
                         else:
                             full_arg_name = f"{arg.name}"
                         root_params[arg.name] = PAINodeParam(name=arg.name, arg_name=full_arg_name, value=MISSING)
+                        choices = enum_choices(arg.enum) if arg.enum else None
+                        arg_type = str if arg.enum else arg.type
                         parser.add_argument(f"--{full_arg_name}",
                                             default=None if isinstance(arg.default, MISSING.__class__) else arg.default,
                                             help=arg.meta.get('help', "Missing help string"),
-                                            type=arg.type,
-                                            action=setter_action(root_params[arg.name]),
+                                            type=arg_type,
+                                            choices=choices,
+                                            action=setter_action(root_params[arg.name], arg),
                                             nargs='*' if arg.list else None)
 
-        def setter_action(arg: PAINodeParam):
+        def setter_action(arg: PAINodeParam, field: ArgumentField):
             class FieldSetterAction(Action):
                 def __call__(self, parser, args, values, option_string=None):
-                    arg.value = values
+                    if field.enum:
+                        arg.value = str_to_enum(values, field.enum, field.type)
+                    else:
+                        arg.value = values
             return FieldSetterAction
 
         flag = f'--{prefix}{param_name}'

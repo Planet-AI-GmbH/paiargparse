@@ -1,5 +1,8 @@
 from dataclasses import dataclass, _MISSING_TYPE
-from typing import Any, List
+from enum import Enum
+from typing import Any, List, Type
+
+SUPPORTED_ENUM_TYPES = {int, str, float}
 
 
 @dataclass
@@ -12,6 +15,7 @@ class ArgumentField:
     dataclass: bool
     default: Any
     required: bool
+    enum: Type[Enum]
 
 
 def split_optional_type(t):
@@ -42,9 +46,25 @@ def split_list_type(ftype):
         return False, ftype
 
 
+def split_enum_type(etype):
+    is_enum = issubclass(etype, Enum)
+    if not is_enum:
+        return None, etype
+
+    enum_type = None
+    for t in SUPPORTED_ENUM_TYPES:
+        if issubclass(etype, t):
+            enum_type = t
+            break
+    if enum_type is None:
+        raise ValueError(f"Unknown enum type of {enum_type}. Supported types are {SUPPORTED_ENUM_TYPES}")
+    return etype, enum_type
+
+
 def arg_from_field(name, meta, field) -> ArgumentField:
     is_optional, t = split_optional_type(field.type)
     is_list, t = split_list_type(t)
+    enum_class, t = split_enum_type(t)
     is_dataclass = hasattr(t, '__dataclass_fields__')
 
     default = field.default
@@ -53,7 +73,8 @@ def arg_from_field(name, meta, field) -> ArgumentField:
 
     required = is_field_required(field)
 
-    return ArgumentField(name=name, type=t, meta=meta, optional=is_optional, list=is_list, dataclass=is_dataclass,
+    return ArgumentField(name=name, type=t, meta=meta, optional=is_optional, list=is_list,
+                         dataclass=is_dataclass, enum=enum_class,
                          default=default, required=required)
 
 
@@ -70,3 +91,19 @@ def extract_args_of_dataclass(dc) -> List[ArgumentField]:
 
     return args
 
+
+def enum_choices(enum_cls: Type[Enum]):
+    return list(enum_cls.__members__.keys()) + list(v.value for v in enum_cls.__members__.values())
+
+
+def str_to_enum(v: str, enum_cls: Type[Enum], enum_type):
+    try:
+        return enum_cls(enum_type(v))
+    except ValueError:
+        pass
+
+    for k, e in enum_cls.__members__.items():
+        if k == v:
+            return e
+
+    raise ValueError(f"Could not match {v} to any valid key in {enum_cls.__members__.keys()}.")

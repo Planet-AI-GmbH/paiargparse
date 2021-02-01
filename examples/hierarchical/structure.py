@@ -1,6 +1,19 @@
 from dataclasses import field
+from enum import IntEnum, Enum
 
 from paiargparse import pai_dataclass, pai_meta
+
+
+class IntEnumEx(IntEnum):
+    A = 0
+    B = 1
+    C = 2
+
+
+class StrEnumEx(str, Enum):
+    A = 'test1'
+    B = 'test2'
+    C = 'test3'
 
 
 @pai_dataclass
@@ -21,5 +34,7 @@ class Child2(ChildBase):
 @pai_dataclass
 class Parent:
     opt_int: int = -1
+    enum: IntEnumEx = IntEnumEx.B
+    str_enum: StrEnumEx = StrEnumEx.A
 
     child: ChildBase = field(default_factory=Child1, metadata=pai_meta(help='Select the child'))

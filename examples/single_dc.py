@@ -13,8 +13,8 @@ class ParamSet1:
 @pai_dataclass
 class ParamSet2:
     required_str_param: str
-    int_param: int = 0
-    float_param: float = 1.0
+    int_param: int = 4
+    float_param: float = 5.0
 
 
 if __name__ == '__main__':
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_root_argument("set1", ParamSet1)
 
     # ParamSet 2 but with different default
-    parser.add_root_argument("set2", ParamSet2, default=ParamSet2(required_str_param=1, int_param=5))
+    parser.add_root_argument("set2", ParamSet2, default=ParamSet2(required_str_param="test_str", int_param=5))
 
     # parse args
     args = parser.parse_args()
