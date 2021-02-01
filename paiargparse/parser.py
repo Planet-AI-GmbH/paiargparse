@@ -1,13 +1,12 @@
-from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter
-from dataclasses import _MISSING_TYPE
+import sys
+from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
+from dataclasses import MISSING
 from typing import Any, Dict
 import importlib
-from unittest.mock import DEFAULT
 
 from paiargparse.dataclass_meta import DEFAULT_SEPARATOR
-from paiargparse.dataclass_parser import extract_args_of_dataclass, is_field_required
+from paiargparse.dataclass_parser import extract_args_of_dataclass
 from paiargparse.param_tree import PAINode, PAINodeParam, PAINodeDataClass
-from test.dataclasse_setup import TestMetaLevel1
 
 
 class RequiredArgumentError(Exception):
@@ -92,9 +91,9 @@ class PAIArgumentParser(ArgumentParser):
                         parser.add_dc_argument(arg.name, arg.type, root_dcs[arg.name].value.dcs, f"{prefix}{param_name}{sep}", parent=root)
                     else:
                         full_arg_name = f"{prefix}{param_name}{sep}{arg.name}"
-                        root_params[arg.name] = PAINodeParam(name=arg.name, arg_name=full_arg_name, value=_MISSING_TYPE())
+                        root_params[arg.name] = PAINodeParam(name=arg.name, arg_name=full_arg_name, value=MISSING)
                         parser.add_argument(f"--{full_arg_name}",
-                                            default=None if isinstance(arg.default, _MISSING_TYPE) else arg.default,
+                                            default=None if isinstance(arg.default, MISSING.__class__) else arg.default,
                                             help=arg.meta.get('help', "Missing help string"),
                                             type=arg.type,
                                             action=setter_action(root_params[arg.name]),
@@ -112,6 +111,10 @@ class PAIArgumentParser(ArgumentParser):
                           default=self._default_data_classes_to_set_after_next_run[flag])
 
     def parse_known_args(self, args=None, namespace=None):
+        args = sys.argv[1:] if args is None else list(args)
+        if namespace is None:
+            namespace = Namespace()
+
         prev_args = args
         while len(args) > 0:
             if args[0] in {'-h', '--help'}:

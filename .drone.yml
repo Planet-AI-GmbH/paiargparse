@@ -28,12 +28,44 @@ steps:
   commands:
   - cd $DRONE_WORKSPACE_BASE
   - echo $PWD
-  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_data_class.TestPAIParser.test_required
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+    test.test_cmd_line.TestCmdLine.test_single_dc test.test_data_class.TestPAIParser.test_required
     test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
-    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
+    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_cmd_line.TestCmdLine.test_single_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_data_class.TestPAIParser.test_required
   image: planet:python3
   volumes:
@@ -90,6 +122,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_json.TestPAIParser.test_two_dc_change
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_json.TestPAIParser.test_two_dc_change
   when:
     status:
     - failure
@@ -299,12 +346,44 @@ steps:
   commands:
   - cd $DRONE_WORKSPACE_BASE
   - echo $PWD
-  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_data_class.TestPAIParser.test_required
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+    test.test_cmd_line.TestCmdLine.test_single_dc test.test_data_class.TestPAIParser.test_required
     test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
-    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
+    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_cmd_line.TestCmdLine.test_single_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_data_class.TestPAIParser.test_required
   image: planet:python3
   volumes:
@@ -361,6 +440,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_json.TestPAIParser.test_two_dc_change
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_json.TestPAIParser.test_two_dc_change
   when:
     status:
     - failure
@@ -564,12 +658,44 @@ steps:
   commands:
   - cd $DRONE_WORKSPACE_BASE
   - echo $PWD
-  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_data_class.TestPAIParser.test_required
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+    test.test_cmd_line.TestCmdLine.test_single_dc test.test_data_class.TestPAIParser.test_required
     test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
-    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
+    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_cmd_line.TestCmdLine.test_single_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_data_class.TestPAIParser.test_required
   image: planet:python3
   volumes:
@@ -626,6 +752,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_json.TestPAIParser.test_two_dc_change
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_json.TestPAIParser.test_two_dc_change
   when:
     status:
     - failure
@@ -833,10 +974,12 @@ steps:
   commands:
   - cd $DRONE_WORKSPACE_BASE
   - echo $PWD
-  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_data_class.TestPAIParser.test_required
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_hierarchical_dc
+    test.test_cmd_line.TestCmdLine.test_single_dc test.test_data_class.TestPAIParser.test_required
     test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
-    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
+    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
 - name: notify

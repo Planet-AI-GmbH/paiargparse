@@ -113,7 +113,7 @@ def notify_step():
         'echo "" >> message.txt',
         'echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt',
         'echo "Failed steps:" >> message.txt',
-        'echo $DRONE_FAILED_STEPS | sed "s/,/\\\\n/g" >> message.txt',
+        'echo $DRONE_FAILED_STEPS >> message.txt',
         'echo "Please check the links for more information." >> message.txt',
         'echo "Errors and changes leading to failure:" >> message.txt',
         'echo "  $CI_BUILD_LINK" >> message.txt',

@@ -1,6 +1,6 @@
 from dataclasses import field
 
-from paiargparse.dataclass_meta import dc_meta, pai_dataclass
+from paiargparse import pai_meta, pai_dataclass
 
 
 @pai_dataclass
@@ -33,13 +33,13 @@ class Level1b:
 
 @pai_dataclass
 class TestMetaLevel2:
-    p: str = field(default='', metadata=dc_meta(separator='+'))
+    p: str = field(default='', metadata=pai_meta(separator='+'))
 
 
 @pai_dataclass
 class TestMetaLevel1:
     p: int = 0
-    sub: TestMetaLevel2 = field(default_factory=TestMetaLevel2, metadata=dc_meta(
+    sub: TestMetaLevel2 = field(default_factory=TestMetaLevel2, metadata=pai_meta(
         help='Help str',
         separator='/',
     ))
