@@ -28,14 +28,29 @@ steps:
   commands:
   - cd $DRONE_WORKSPACE_BASE
   - echo $PWD
-  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_hierarchical_dc
-    test.test_cmd_line.TestCmdLine.test_single_dc test.test_data_class.TestPAIParser.test_required
-    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
-    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
-    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+    test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
+    test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
+    test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
+    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
+    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_cmd_line.TestCmdLine.test_hierarchical_dc
   image: planet:python3
   volumes:
@@ -262,7 +277,7 @@ steps:
   - echo "" >> message.txt
   - echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt
   - echo "Failed steps:" >> message.txt
-  - echo $DRONE_FAILED_STEPS | sed "s/,/\\n/g" >> message.txt
+  - echo $DRONE_FAILED_STEPS >> message.txt
   - echo "Please check the links for more information." >> message.txt
   - echo "Errors and changes leading to failure:" >> message.txt
   - echo "  $CI_BUILD_LINK" >> message.txt
@@ -346,14 +361,29 @@ steps:
   commands:
   - cd $DRONE_WORKSPACE_BASE
   - echo $PWD
-  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_hierarchical_dc
-    test.test_cmd_line.TestCmdLine.test_single_dc test.test_data_class.TestPAIParser.test_required
-    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
-    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
-    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+    test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
+    test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
+    test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
+    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
+    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_cmd_line.TestCmdLine.test_hierarchical_dc
   image: planet:python3
   volumes:
@@ -580,7 +610,7 @@ steps:
   - echo "" >> message.txt
   - echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt
   - echo "Failed steps:" >> message.txt
-  - echo $DRONE_FAILED_STEPS | sed "s/,/\\n/g" >> message.txt
+  - echo $DRONE_FAILED_STEPS >> message.txt
   - echo "Please check the links for more information." >> message.txt
   - echo "Errors and changes leading to failure:" >> message.txt
   - echo "  $CI_BUILD_LINK" >> message.txt
@@ -658,14 +688,29 @@ steps:
   commands:
   - cd $DRONE_WORKSPACE_BASE
   - echo $PWD
-  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_hierarchical_dc
-    test.test_cmd_line.TestCmdLine.test_single_dc test.test_data_class.TestPAIParser.test_required
-    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
-    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
-    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+    test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
+    test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
+    test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
+    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
+    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
+- name: test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_cmd_line.TestCmdLine.test_hierarchical_dc
   image: planet:python3
   volumes:
@@ -892,7 +937,7 @@ steps:
   - echo "" >> message.txt
   - echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt
   - echo "Failed steps:" >> message.txt
-  - echo $DRONE_FAILED_STEPS | sed "s/,/\\n/g" >> message.txt
+  - echo $DRONE_FAILED_STEPS >> message.txt
   - echo "Please check the links for more information." >> message.txt
   - echo "Errors and changes leading to failure:" >> message.txt
   - echo "  $CI_BUILD_LINK" >> message.txt
@@ -974,12 +1019,12 @@ steps:
   commands:
   - cd $DRONE_WORKSPACE_BASE
   - echo $PWD
-  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_hierarchical_dc
-    test.test_cmd_line.TestCmdLine.test_single_dc test.test_data_class.TestPAIParser.test_required
-    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
-    test.test_default_value.TestPAIParserDefault.test_required test.test_default_value.TestPAIParserDefault.test_required_from_default
-    test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
+  - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
+    test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
+    test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
+    test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
+    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_default_value.TestPAIParserDefault.test_required
+    test.test_default_value.TestPAIParserDefault.test_required_from_default test.test_default_value.TestPAIParserDefault.test_setting_argument_after_override
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
 - name: notify
@@ -998,7 +1043,7 @@ steps:
   - echo "" >> message.txt
   - echo "Failed stages:" $DRONE_FAILED_STAGES >> message.txt
   - echo "Failed steps:" >> message.txt
-  - echo $DRONE_FAILED_STEPS | sed "s/,/\\n/g" >> message.txt
+  - echo $DRONE_FAILED_STEPS >> message.txt
   - echo "Please check the links for more information." >> message.txt
   - echo "Errors and changes leading to failure:" >> message.txt
   - echo "  $CI_BUILD_LINK" >> message.txt

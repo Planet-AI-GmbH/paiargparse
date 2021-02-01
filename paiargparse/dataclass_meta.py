@@ -10,8 +10,10 @@ DEFAULT_SEPARATOR = '.'
 def pai_meta(*,
              help=None,
              separator=DEFAULT_SEPARATOR,
+             mode='snake',
              ):
     assert(separator in '/._-+')
+    assert(mode in {'snake', 'ignore', 'flat'})
     return locals()
 
 

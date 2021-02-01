@@ -44,7 +44,7 @@ class PAIArgumentParser(ArgumentParser):
                 param_values[name] = getattr(node.default, name)
 
         # Check for missing required fields
-        missing_required = [f"--{node.arg_name}{field.meta.get('separator', DEFAULT_SEPARATOR)}{field.name}" for field in extract_args_of_dataclass(node.type) if field.name not in param_values and field.required]
+        missing_required = [f"--{node.params[field.name].arg_name}" for field in extract_args_of_dataclass(node.type) if field.name not in param_values and field.required]
         if len(missing_required) > 0:
             raise RequiredArgumentError('The following arguments are required: {}'.format(', '.join(missing_required)))
 
@@ -79,8 +79,13 @@ class PAIArgumentParser(ArgumentParser):
                 root_params = pai_node.params
                 for arg in extract_args_of_dataclass(dc_type):
                     sep = arg.meta.get('separator', DEFAULT_SEPARATOR)
+                    mode = arg.meta.get('mode', 'snake')
+
+                    if mode == 'ignore':
+                        continue
+
                     if arg.dataclass:
-                        default = None if pai_node.default is None else getattr(pai_node.default, arg.name)
+                        default = getattr(pai_node.default, arg.name) if hasattr(pai_node.default, arg.name) else arg.default
                         root_dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                               arg_name=f"{prefix}{param_name}{sep}",
                                                               value=PAINode(
@@ -90,7 +95,10 @@ class PAIArgumentParser(ArgumentParser):
                                                               )
                         parser.add_dc_argument(arg.name, arg.type, root_dcs[arg.name].value.dcs, f"{prefix}{param_name}{sep}", parent=root)
                     else:
-                        full_arg_name = f"{prefix}{param_name}{sep}{arg.name}"
+                        if mode == 'snake':
+                            full_arg_name = f"{prefix}{param_name}{sep}{arg.name}"
+                        else:
+                            full_arg_name = f"{arg.name}"
                         root_params[arg.name] = PAINodeParam(name=arg.name, arg_name=full_arg_name, value=MISSING)
                         parser.add_argument(f"--{full_arg_name}",
                                             default=None if isinstance(arg.default, MISSING.__class__) else arg.default,
@@ -116,8 +124,8 @@ class PAIArgumentParser(ArgumentParser):
             namespace = Namespace()
 
         prev_args = args
-        while len(args) > 0:
-            if args[0] in {'-h', '--help'}:
+        while len(args) > 0 or len(self._default_data_classes_to_set_after_next_run) > 0:
+            if len(args) > 0 and args[0] in {'-h', '--help'}:
                 break
             for k, v in self._default_data_classes_to_set_after_next_run.items():
                 if k not in args:
