@@ -1,6 +1,6 @@
 from dataclasses import dataclass, _MISSING_TYPE
 from enum import Enum
-from typing import Any, List, Type
+from typing import Any, List, Type, Optional
 
 SUPPORTED_ENUM_TYPES = {int, str, float}
 
@@ -15,7 +15,18 @@ class ArgumentField:
     dataclass: bool
     default: Any
     required: bool
-    enum: Type[Enum]
+    enum: Optional[Type[Enum]]   # If set its an enum, this is the type
+    dict_type: Any     # If set its a dict, this is the VALUE type, type is the key type
+
+    def __post_init__(self):
+        # check if it is a supported type
+        if self.list and self.dict_type:
+            raise ValueError("Only list or dict types are supported")
+
+        if self.dict_type and self.dataclass:
+            supported_types = {str}
+            if self.type not in supported_types:
+                raise TypeError(f"If using a Dict[type, DataClass], type must be in {supported_types}, but got {self.type}")
 
 
 def split_optional_type(t):
@@ -46,6 +57,19 @@ def split_list_type(ftype):
         return False, ftype
 
 
+def split_dict_type(dtype):
+    if isinstance(dtype, type):
+        return dtype, None
+    is_dict = (hasattr(dtype, "__args__")
+               and len(dtype.__args__) == 2
+               and dtype._name == 'Dict'
+               )
+    if is_dict:
+        return dtype.__args__
+    else:
+        return dtype, None
+
+
 def split_enum_type(etype):
     is_enum = issubclass(etype, Enum)
     if not is_enum:
@@ -64,8 +88,12 @@ def split_enum_type(etype):
 def arg_from_field(name, meta, field) -> ArgumentField:
     is_optional, t = split_optional_type(field.type)
     is_list, t = split_list_type(t)
+    t, dict_type = split_dict_type(t)
     enum_class, t = split_enum_type(t)
-    is_dataclass = hasattr(t, '__dataclass_fields__')
+    if dict_type:
+        is_dataclass = hasattr(dict_type, '__dataclass_fields__')
+    else:
+        is_dataclass = hasattr(t, '__dataclass_fields__')
 
     default = field.default
     if isinstance(default, _MISSING_TYPE) and not isinstance(field.default_factory, _MISSING_TYPE):
@@ -75,7 +103,7 @@ def arg_from_field(name, meta, field) -> ArgumentField:
 
     return ArgumentField(name=name, type=t, meta=meta, optional=is_optional, list=is_list,
                          dataclass=is_dataclass, enum=enum_class,
-                         default=default, required=required)
+                         default=default, required=required, dict_type=dict_type)
 
 
 def is_field_required(field):

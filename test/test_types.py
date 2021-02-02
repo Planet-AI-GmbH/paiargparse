@@ -1,5 +1,5 @@
 import unittest
-from dataclasses import field
+from dataclasses import field, dataclass
 from enum import IntEnum, Enum
 from typing import List
 
@@ -19,6 +19,7 @@ class StrEnumEx(str, Enum):
 
 
 @pai_dataclass
+@dataclass
 class DifferentTypes:
     int_enum: IntEnumEx = IntEnumEx.A
     str_enum: StrEnumEx = StrEnumEx.A

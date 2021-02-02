@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, is_dataclass
 
 from dataclasses_json import dataclass_json
 
@@ -38,8 +38,9 @@ def pai_dataclass(_cls=None):
 
 
 def _process_class(cls):
-    # apply dataclass_json and dataclass
-    cls = dataclass_json(dataclass(cls))
+    # apply dataclass_json, dataclass must be assigned manually for intellisense
+    assert(is_dataclass(cls))
+    cls = dataclass_json(cls)
 
     # override to dict and from dict
     cls.to_dict = PaiDataClassMixin.to_dict

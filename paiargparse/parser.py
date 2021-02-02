@@ -13,21 +13,87 @@ class RequiredArgumentError(Exception):
     pass
 
 
-def _setter_action(arg: PAINodeParam, field: ArgumentField):
-    class FieldSetterAction(Action):
-        def __call__(self, parser, args, values, option_string=None):
-            if field.list:
-                if field.enum:
-                    arg.value = [str_to_enum(v, field.enum, field.type) for v in values]
-                else:
-                    arg.value = values
-            else:
-                if field.enum:
-                    arg.value = str_to_enum(values, field.enum, field.type)
-                else:
-                    arg.value = values
+def _setter_action(pai_node: PAINode, arg: PAINodeParam, field: ArgumentField):
+    if field.dict_type and field.dataclass:
+        sep = field.meta.get('separator', DEFAULT_SEPARATOR)
 
-    return FieldSetterAction
+        class DictParserAction(Action):
+            def __call__(self, parser: PAIArgumentParser, args, values, option_string=None):
+                if len(values) == 1 and values[0] in parser._default_data_classes_to_set_after_next_run:
+                    # Parse default (if set)
+                    values = values[0]
+                    defaults = parser._default_data_classes_to_set_after_next_run[values]
+                    del parser._default_data_classes_to_set_after_next_run[values]
+                    if defaults.value:
+                        defaults = defaults.value
+                        dict_values = {k: v.__class__ for k, v in defaults.items()}
+                    else:
+                        defaults = {}
+                        dict_values = {}
+                else:
+                    # Parse values
+                    dict_values = {}
+                    defaults = {}
+                    for value in values:
+                        if '=' not in value:
+                            k, v = value, field.dict_type
+                        else:
+                            k, v = value.split('=')
+                            module, class_name = v.split(":")
+                            v = getattr(importlib.import_module(module), class_name)
+
+                        defaults[k] = None
+                        dict_values[k] = v
+
+                # Add new args for this argument
+                pai_node.dcs[arg.name] = PAINodeDataClass(name=arg.name,
+                                                          arg_name=f"{arg.arg_name}{sep}",
+                                                          value=PAINode(
+                                                              type=dict,
+                                                              default=None,
+                                                              name=arg.name, arg_name=f"{arg.arg_name}{sep}")
+                                                          )
+                root_dcs = pai_node.dcs[arg.name].value.dcs
+
+                for k, v in dict_values.items():
+                    dc_type = v
+                    root_dcs[k] = PAINodeDataClass(name=k,
+                                                   arg_name=f"{arg.arg_name}{sep}",
+                                                   value=PAINode(
+                                                       type=dc_type,
+                                                       default=defaults[k],
+                                                       name=k, arg_name=f"{arg.arg_name}{sep}")
+                                                   )
+                    _handle_data_class(parser, root_dcs[k].value, f"{arg.arg_name}{sep}", k,
+                                       root_dcs, None, dc_type)
+
+        return DictParserAction
+    elif field.dict_type:
+        class DictParserAction(Action):
+            def __call__(self, parser: PAIArgumentParser, args, values, option_string=None):
+                arg.value = {}
+                for value in values:
+                    k, v = value.split('=')
+                    k = field.type(k)
+                    v = field.dict_type(v)
+                    arg.value[k] = v
+
+        return DictParserAction
+    else:
+        class FieldSetterAction(Action):
+            def __call__(self, parser, args, values, option_string=None):
+                if field.list:
+                    if field.enum:
+                        arg.value = [str_to_enum(v, field.enum, field.type) for v in values]
+                    else:
+                        arg.value = values
+                else:
+                    if field.enum:
+                        arg.value = str_to_enum(values, field.enum, field.type)
+                    else:
+                        arg.value = values
+
+        return FieldSetterAction
 
 
 def _handle_data_class(
@@ -62,7 +128,7 @@ def _handle_data_class(
         if mode == 'ignore':
             continue
 
-        if arg.dataclass:
+        if not arg.dict_type and arg.dataclass:
             default = getattr(pai_node.default, arg.name) if hasattr(pai_node.default, arg.name) else arg.default
             root_dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                   arg_name=f"{prefix}{param_name}{sep}",
@@ -71,10 +137,10 @@ def _handle_data_class(
                                                       default=default,
                                                       name=arg.name, arg_name=f"{prefix}{param_name}{sep}")
                                                   )
-            parser.add_dc_argument(arg.name, arg.type, root_dcs[arg.name].value.dcs, f"{prefix}{param_name}{sep}",
+            parser.add_dc_argument(root_dcs[arg.name].value.dcs,
+                                   f"{prefix}{param_name}{sep}",
                                    parent=root,
-                                   nargs=arg.meta.get('nargs', '*') if arg.list else None,
-                                   sep=sep,
+                                   arg_field=arg,
                                    )
         else:
             if mode == 'snake':
@@ -83,14 +149,21 @@ def _handle_data_class(
                 full_arg_name = f"{arg.name}"
             root_params[arg.name] = PAINodeParam(name=arg.name, arg_name=full_arg_name, value=MISSING)
             choices = enum_choices(arg.enum) if arg.enum else None
-            arg_type = str if arg.enum else arg.type
+            arg_type = str if arg.enum or arg.dict_type else arg.type
             parser.add_argument(f"--{full_arg_name}",
                                 default=None if isinstance(arg.default, MISSING.__class__) else arg.default,
                                 help=arg.meta.get('help', "Missing help string"),
                                 type=arg_type,
                                 choices=choices,
-                                action=_setter_action(root_params[arg.name], arg),
-                                nargs=arg.meta.get('nargs', '*') if arg.list else None)
+                                action=_setter_action(pai_node, root_params[arg.name], arg),
+                                nargs=arg.meta.get('nargs', '*') if arg.list or arg.dict_type else None)
+
+            if arg.dict_type and arg.dataclass:
+                default = DefaultArg(
+                    dict,
+                    getattr(pai_node.default, arg.name, None),
+                )
+                parser._default_data_classes_to_set_after_next_run[full_arg_name] = default
 
 
 class DefaultArg(NamedTuple):
@@ -131,6 +204,8 @@ class PAIArgumentParser(ArgumentParser):
 
         if node.type in {list, tuple}:
             dc = node.type([v for k, v in param_values.items()])
+        elif node.type == dict:
+            return param_values
         else:
             # Check for missing required fields
             missing_required = [f"--{node.params[field.name].arg_name}" for field in extract_args_of_dataclass(node.type) if field.name not in param_values and field.required]
@@ -143,6 +218,8 @@ class PAIArgumentParser(ArgumentParser):
         return dc
 
     def add_root_argument(self, param_name: str, dc_type: Any, default: Any=None):
+        if not isinstance(dc_type, type):
+            raise TypeError("Not passing a type to dc_type. If you want to pass default values, use the default argument.")
         self._params_tree.dcs[param_name] = PAINodeDataClass(name=param_name,
                                                              arg_name=param_name,
                                                              value=PAINode(type=dc_type,
@@ -151,17 +228,34 @@ class PAIArgumentParser(ArgumentParser):
                                                                            arg_name=param_name,
                                                                            )
                                                              )
-        self.add_dc_argument(param_name, dc_type, self._params_tree.dcs[param_name].value.dcs, prefix='', parent=self._params_tree.dcs)
+        self.add_dc_argument(
+            self._params_tree.dcs[param_name].value.dcs,
+            prefix='',
+            parent=self._params_tree.dcs,
+            arg_field=ArgumentField(
+                param_name,
+                dc_type,
+                {},
+                False,
+                False,
+                True,
+                default,
+                required=False,
+                enum=None,
+                dict_type=None,
+            ),
+        )
 
     def add_dc_argument(self,
-                        param_name: str,
-                        dc_type: Any,
                         root: dict,
                         prefix: str,
                         parent: Dict[str, PAINodeDataClass],
-                        nargs=None,
-                        sep=DEFAULT_SEPARATOR,  # Only required for nargs
+                        arg_field: ArgumentField,
                         ):
+        param_name = arg_field.name
+        dc_type = arg_field.type
+        sep = arg_field.meta.get('separator', DEFAULT_SEPARATOR)
+        nargs = arg_field.meta.get('nargs', '*')
         pai_node = parent[param_name].value
 
         class ListDataClassAction(Action):
@@ -205,9 +299,18 @@ class PAIArgumentParser(ArgumentParser):
             pai_node.default,
         )
 
+        def make_action():
+            if arg_field.list:
+                return ListDataClassAction, nargs
+            elif arg_field.dict_type:
+                raise NotImplementedError
+            else:
+                return DataClassAction, None
+
         self._default_data_classes_to_set_after_next_run[flag] = default
+        action, nargs = make_action()
         self.add_argument('--' + flag,
-                          action=DataClassAction if nargs is None else ListDataClassAction,
+                          action=action,
                           type=str,
                           nargs=nargs
                           )

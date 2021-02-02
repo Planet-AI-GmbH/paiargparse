@@ -1,4 +1,4 @@
-from dataclasses import field
+from dataclasses import field, dataclass
 from enum import IntEnum, Enum
 
 from paiargparse import pai_dataclass, pai_meta
@@ -17,21 +17,25 @@ class StrEnumEx(str, Enum):
 
 
 @pai_dataclass
+@dataclass
 class ChildBase:
     shared_arg: float = 0.0
 
 
 @pai_dataclass
+@dataclass
 class Child1(ChildBase):
     p1: int = 0
 
 
 @pai_dataclass
+@dataclass
 class Child2(ChildBase):
     p2: float = 1
 
 
 @pai_dataclass
+@dataclass
 class Parent:
     opt_int: int = -1
     enum: IntEnumEx = IntEnumEx.B

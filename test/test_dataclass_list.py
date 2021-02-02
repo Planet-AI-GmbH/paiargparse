@@ -1,21 +1,24 @@
 import unittest
-from dataclasses import field
+from dataclasses import field, dataclass
 from typing import List
 
 from paiargparse import pai_dataclass, PAIArgumentParser
 
 
 @pai_dataclass
+@dataclass
 class Sub:
     int_arg: int = -1
 
 
 @pai_dataclass
+@dataclass
 class DC:
     l: List[Sub] = field(default_factory=list)
 
 
 @pai_dataclass
+@dataclass
 class DCWithDefault:
     l: List[Sub] = field(default_factory=lambda: [Sub(-2), Sub(2)])
 

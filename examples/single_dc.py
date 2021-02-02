@@ -1,9 +1,11 @@
 import json
+from dataclasses import dataclass
 
 from paiargparse import pai_dataclass, PAIArgumentParser
 
 
 @pai_dataclass
+@dataclass
 class ParamSet1:
     required_str_param: str
     int_param: int = 0
@@ -11,6 +13,7 @@ class ParamSet1:
 
 
 @pai_dataclass
+@dataclass
 class ParamSet2:
     required_str_param: str
     int_param: int = 4
