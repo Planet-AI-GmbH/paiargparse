@@ -6,14 +6,14 @@ import importlib
 
 from paiargparse.dataclass_meta import DEFAULT_SEPARATOR
 from paiargparse.dataclass_parser import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices
-from paiargparse.param_tree import PAINode, PAINodeParam, PAINodeDataClass
+from paiargparse.param_tree import PAINode, PAINodeDataClass
 
 
 class RequiredArgumentError(Exception):
     pass
 
 
-def _setter_action(pai_node: PAINode, arg: PAINodeParam, field: ArgumentField):
+def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentField):
     if field.dict_type and field.dataclass:
         sep = field.meta.get('separator', DEFAULT_SEPARATOR)
 
@@ -48,23 +48,21 @@ def _setter_action(pai_node: PAINode, arg: PAINodeParam, field: ArgumentField):
                 # Add new args for this argument
                 pai_node.dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                           arg_name=f"{arg.arg_name}{sep}",
-                                                          value=PAINode(
-                                                              type=dict,
-                                                              default=None,
-                                                              name=arg.name, arg_name=f"{arg.arg_name}{sep}")
+                                                          type=dict,
+                                                          default=None,
+                                                          value=None,
                                                           )
-                root_dcs = pai_node.dcs[arg.name].value.dcs
+                root_dcs = pai_node.dcs[arg.name].dcs
 
                 for k, v in dict_values.items():
                     dc_type = v
                     root_dcs[k] = PAINodeDataClass(name=k,
                                                    arg_name=f"{arg.arg_name}{sep}",
-                                                   value=PAINode(
-                                                       type=dc_type,
-                                                       default=defaults[k],
-                                                       name=k, arg_name=f"{arg.arg_name}{sep}")
+                                                   type=dc_type,
+                                                   default=defaults[k],
+                                                   value=None,
                                                    )
-                    _handle_data_class(parser, root_dcs[k].value, f"{arg.arg_name}{sep}", k,
+                    _handle_data_class(parser, root_dcs[k], f"{arg.arg_name}{sep}", k,
                                        root_dcs, None, dc_type)
 
         return DictParserAction
@@ -132,12 +130,11 @@ def _handle_data_class(
             default = getattr(pai_node.default, arg.name) if hasattr(pai_node.default, arg.name) else arg.default
             root_dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                   arg_name=f"{prefix}{param_name}{sep}",
-                                                  value=PAINode(
-                                                      type=list if arg.list else arg.type,
-                                                      default=default,
-                                                      name=arg.name, arg_name=f"{prefix}{param_name}{sep}")
+                                                  type=list if arg.list else arg.type,
+                                                  default=default,
+                                                  value=None,
                                                   )
-            parser.add_dc_argument(root_dcs[arg.name].value.dcs,
+            parser.add_dc_argument(root_dcs[arg.name].dcs,
                                    f"{prefix}{param_name}{sep}",
                                    parent=root,
                                    arg_field=arg,
@@ -147,7 +144,7 @@ def _handle_data_class(
                 full_arg_name = f"{prefix}{param_name}{sep}{arg.name}"
             else:
                 full_arg_name = f"{arg.name}"
-            root_params[arg.name] = PAINodeParam(name=arg.name, arg_name=full_arg_name, value=MISSING)
+            root_params[arg.name] = PAINode(name=arg.name, arg_name=full_arg_name, value=MISSING)
             choices = enum_choices(arg.enum) if arg.enum else None
             arg_type = str if arg.enum or arg.dict_type else arg.type
             parser.add_argument(f"--{full_arg_name}",
@@ -181,11 +178,11 @@ class PAIArgumentParser(ArgumentParser):
         super(PAIArgumentParser, self).__init__(add_help=False, formatter_class=formatter_class, *args, **kwargs)
 
         self._default_data_classes_to_set_after_next_run: Dict[str, DefaultArg] = {}
-        self._params_tree = PAINode(None, name='', arg_name='')  # Root
+        self._params_tree = PAINodeDataClass(type=None, name='', arg_name='', value=None)  # Root
 
-    def _tree_to_data_class(self, node: PAINode):
+    def _tree_to_data_class(self, node: PAINodeDataClass):
         for k, v in node.dcs.items():
-            node.dcs[k].value = self._tree_to_data_class(v.value)
+            node.dcs[k].value = self._tree_to_data_class(v)
 
         # construct actual dataclass
         param_values = node.all_param_values()
@@ -222,14 +219,12 @@ class PAIArgumentParser(ArgumentParser):
             raise TypeError("Not passing a type to dc_type. If you want to pass default values, use the default argument.")
         self._params_tree.dcs[param_name] = PAINodeDataClass(name=param_name,
                                                              arg_name=param_name,
-                                                             value=PAINode(type=dc_type,
-                                                                           default=default,
-                                                                           name=param_name,
-                                                                           arg_name=param_name,
-                                                                           )
+                                                             type=dc_type,
+                                                             default=default,
+                                                             value=None,
                                                              )
         self.add_dc_argument(
-            self._params_tree.dcs[param_name].value.dcs,
+            self._params_tree.dcs[param_name].dcs,
             prefix='',
             parent=self._params_tree.dcs,
             arg_field=ArgumentField(
@@ -256,7 +251,7 @@ class PAIArgumentParser(ArgumentParser):
         dc_type = arg_field.type
         sep = arg_field.meta.get('separator', DEFAULT_SEPARATOR)
         nargs = arg_field.meta.get('nargs', '*')
-        pai_node = parent[param_name].value
+        pai_node = parent[param_name]
 
         class ListDataClassAction(Action):
             def __call__(self, parser: 'PAIArgumentParser', args, values, option_string=None):
@@ -281,12 +276,11 @@ class PAIArgumentParser(ArgumentParser):
                     root_dcs = pai_node.dcs
                     root_dcs[str(i)] = PAINodeDataClass(name=str(i),
                                                         arg_name=f"{prefix}{param_name}{sep}",
-                                                        value=PAINode(
-                                                            type=dc_type,
-                                                            default=default,
-                                                            name=str(i), arg_name=f"{prefix}{param_name}{sep}")
+                                                        type=dc_type,
+                                                        default=default,
+                                                        value=None,
                                                         )
-                    _handle_data_class(parser, root_dcs[str(i)].value, f"{prefix}{param_name}{sep}", str(i), root_dcs, None, dc_type)
+                    _handle_data_class(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", str(i), root_dcs, None, dc_type)
 
         class DataClassAction(Action):
             def __call__(self, parser: 'PAIArgumentParser', args, values, option_string=None):
@@ -347,5 +341,5 @@ class PAIArgumentParser(ArgumentParser):
         args = super(PAIArgumentParser, self).parse_args(args, namespace)
 
         for name, v in self._params_tree.dcs.items():
-            setattr(args, name, self._tree_to_data_class(v.value))
+            setattr(args, name, self._tree_to_data_class(v))
         return args

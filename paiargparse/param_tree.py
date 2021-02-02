@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 
 @dataclass
-class PAINodeParam:
+class PAINode:
     name: str      # Name of the argument
     arg_name: str  # full argument
     value: Any     # value of the argument
@@ -13,23 +13,11 @@ class PAINodeParam:
 
 
 @dataclass
-class PAINodeDataClass:
-    name: str         # Name of the argument, e.g. param_name
-    arg_name: str     # full argument, e.g. foo/sub/sub/param_name
-    value: 'PAINode'  # 
-
-    def is_null(self):
-        return isinstance(self.value, _MISSING_TYPE)
-
-
-@dataclass
-class PAINode:
+class PAINodeDataClass(PAINode):
     type: Any
-    name: str
-    arg_name: str
     default: Any = None
-    dcs: Dict[str, PAINodeDataClass] = field(default_factory=dict)
-    params: Dict[str, PAINodeParam] = field(default_factory=dict)
+    dcs: Dict[str, 'PAINodeDataClass'] = field(default_factory=dict)
+    params: Dict[str, PAINode] = field(default_factory=dict)
 
     def all_param_values(self):
         return {
