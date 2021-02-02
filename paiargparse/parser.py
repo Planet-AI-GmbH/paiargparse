@@ -15,9 +15,13 @@ class RequiredArgumentError(Exception):
 
 def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentField):
     if field.dict_type and field.dataclass:
+        # if the value type is again a dataclass, handle this differently
+        # The values of the key/value pairs are the type of the dataclass
+        # Create an action that adds new sub files based on the key to allow to set the parameters hierarchically
+
         sep = field.meta.get('separator', DEFAULT_SEPARATOR)
 
-        class DictParserAction(Action):
+        class DictParserDataclassAction(Action):
             def __call__(self, parser: PAIArgumentParser, args, values, option_string=None):
                 if len(values) == 1 and values[0] in parser._default_data_classes_to_set_after_next_run:
                     # Parse default (if set)
@@ -45,7 +49,9 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
                         defaults[k] = None
                         dict_values[k] = v
 
-                # Add new args for this argument
+                # Add new root args for this argument in the params tree,
+                # this is basically another 'dataclass' (key to value mapping)
+                # However, to not register as dataclass to the arguments (since it already exists = self)
                 pai_node.dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                           arg_name=f"{arg.arg_name}{sep}",
                                                           type=dict,
@@ -55,6 +61,9 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
                 root_dcs = pai_node.dcs[arg.name].dcs
 
                 for k, v in dict_values.items():
+                    # Add the sub data classes (key k) and add them as parameters (p1, ..., pn)
+                    # ...root.k.p1 = ...
+                    # ...root.k.p2 = ...
                     dc_type = v
                     root_dcs[k] = PAINodeDataClass(name=k,
                                                    arg_name=f"{arg.arg_name}{sep}",
@@ -62,13 +71,14 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
                                                    default=defaults[k],
                                                    value=None,
                                                    )
-                    _handle_data_class(parser, root_dcs[k], f"{arg.arg_name}{sep}", k,
+                    _handle_data_class(parser, root_dcs[k], f"{arg.arg_name}{sep}",
                                        root_dcs, None, dc_type)
 
-        return DictParserAction
+        return DictParserDataclassAction
     elif field.dict_type:
         class DictParserAction(Action):
             def __call__(self, parser: PAIArgumentParser, args, values, option_string=None):
+                # Handle as normal parameter, but split key value pairs at '='
                 arg.value = {}
                 for value in values:
                     k, v = value.split('=')
@@ -80,6 +90,7 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
     else:
         class FieldSetterAction(Action):
             def __call__(self, parser, args, values, option_string=None):
+                # Simple field, but handle enumerations separately
                 if field.list:
                     if field.enum:
                         arg.value = [str_to_enum(v, field.enum, field.type) for v in values]
@@ -96,13 +107,18 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
 
 def _handle_data_class(
         parser: 'PAIArgumentParser',
-        pai_node: PAINode,
+        pai_node: PAINodeDataClass,
         prefix: str,
-        param_name: str,
-        root: dict,
+        parent_pcs: dict,
         values: Any,
         dc_type=None,
 ):
+    """
+    Add a new sub group to the parser based on the values of a data class
+    """
+    assert(isinstance(pai_node, PAINodeDataClass))
+    param_name = pai_node.name
+
     # Add new args for this argument
     if dc_type is None:
         if values in parser._default_data_classes_to_set_after_next_run:
@@ -116,7 +132,11 @@ def _handle_data_class(
         else:
             module, class_name = values.split(":")
             dc_type = getattr(importlib.import_module(module), class_name)
-    pai_node.type = dc_type
+
+        pai_node.type = dc_type
+    else:
+        assert(dc_type == pai_node.type)
+
     root_dcs = pai_node.dcs
     root_params = pai_node.params
     for arg in extract_args_of_dataclass(dc_type):
@@ -136,7 +156,7 @@ def _handle_data_class(
                                                   )
             parser.add_dc_argument(root_dcs[arg.name].dcs,
                                    f"{prefix}{param_name}{sep}",
-                                   parent=root,
+                                   parent=parent_pcs,
                                    arg_field=arg,
                                    )
         else:
@@ -280,11 +300,11 @@ class PAIArgumentParser(ArgumentParser):
                                                         default=default,
                                                         value=None,
                                                         )
-                    _handle_data_class(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", str(i), root_dcs, None, dc_type)
+                    _handle_data_class(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", root_dcs, None, dc_type)
 
         class DataClassAction(Action):
             def __call__(self, parser: 'PAIArgumentParser', args, values, option_string=None):
-                _handle_data_class(parser, pai_node, prefix, param_name, root, values)
+                _handle_data_class(parser, pai_node, prefix, root, values)
 
         flag = f'{prefix}{param_name}'
 
