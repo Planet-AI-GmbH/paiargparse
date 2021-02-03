@@ -337,8 +337,6 @@ class PAIArgumentParser(ArgumentParser):
         orig_args = args[:]
         prev_args = args
         while len(args) > 0 or len(self._default_data_classes_to_set_after_next_run) > 0:
-            if len(args) > 0 and args[0] in {'-h', '--help'}:
-                break
             for k, v in list(self._default_data_classes_to_set_after_next_run.items()):
                 if f'--{k}' not in orig_args:
                     args += ['--' + k, k]
@@ -350,12 +348,18 @@ class PAIArgumentParser(ArgumentParser):
                 break
             prev_args = args
 
+            # If help string is set, break, but only if nothing is left to process
+            if len(args) > 0 and args[0] in {'-h', '--help'} and len(self._default_data_classes_to_set_after_next_run) == 0:
+                break
+
         # add help as last
         self.add_argument(
             '-h', '--help',
             action='help', default=SUPPRESS,
             help='show this help message and exit')
-        return super(PAIArgumentParser, self).parse_known_args(args, namespace)
+        if len(args) > 0 and args[0] in {'-h', '--help'}:
+            return super(PAIArgumentParser, self).parse_known_args(args, namespace)
+        return namespace, args
 
     def parse_args(self, args=None, namespace=None):
         args = super(PAIArgumentParser, self).parse_args(args, namespace)
