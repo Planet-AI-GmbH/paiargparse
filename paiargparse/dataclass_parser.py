@@ -1,6 +1,6 @@
 from dataclasses import dataclass, _MISSING_TYPE
 from enum import Enum
-from typing import Any, List, Type, Optional
+from typing import Any, List, Type, Optional, Tuple, Union
 
 SUPPORTED_ENUM_TYPES = {int, str, float}
 
@@ -11,7 +11,7 @@ class ArgumentField:
     type: Any
     meta: dict
     optional: bool
-    list: bool
+    list: Optional[Union[Type[list], Type[set]]]
     dataclass: bool
     default: Any
     required: bool
@@ -43,18 +43,25 @@ def split_optional_type(t):
         return False, t
 
 
-def split_list_type(ftype):
+def split_list_type(ftype) -> Tuple[Optional[Union[Type[list], Type[set]]], Any]:
     if isinstance(ftype, type):
-        return False, ftype
+        return None, ftype
     is_list = (hasattr(ftype, "__args__")
                and len(ftype.__args__) == 1
                and ftype._name == 'List'
                )
 
     if is_list:
-        return True, ftype.__args__[0]
+        return list, ftype.__args__[0]
+
+    is_set = (hasattr(ftype, "__args__")
+              and len(ftype.__args__) == 1
+              and ftype._name == 'Set'
+              )
+    if is_set:
+        return set, ftype.__args__[0]
     else:
-        return False, ftype
+        return None, ftype
 
 
 def split_dict_type(dtype):
@@ -113,7 +120,10 @@ def is_field_required(field):
 def extract_args_of_dataclass(dc) -> List[ArgumentField]:
     args = []
     for name, field in dc.__dataclass_fields__.items():
-        meta = field.metadata
+        meta: dict = field.metadata
+        if meta.get('mode', 'snake') == 'ignore':
+            continue
+
         arg = arg_from_field(name, meta, field)
         args.append(arg)
 

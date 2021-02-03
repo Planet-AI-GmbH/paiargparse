@@ -23,7 +23,37 @@ class DCWithDefault:
     l: List[Sub] = field(default_factory=lambda: [Sub(-2), Sub(2)])
 
 
+@pai_dataclass
+@dataclass
+class DCPrimitve:
+    l: List[int] = field(default_factory=list)
+    dl: List[int] = field(default_factory=lambda: [1, 2])
+
+
 class TestDataClassList(unittest.TestCase):
+    def test_primitive_list(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('root', DCPrimitve)
+        dc: DCPrimitve = parser.parse_args(
+            [
+                '--root.l', '0', '1', '0',
+            ]
+        ).root
+
+        self.assertListEqual(dc.l, [0, 1, 0])
+        self.assertListEqual(dc.dl, [1, 2])
+
+    def test_primitive_list_default(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('root', DCPrimitve, DCPrimitve(dl=[4, 5]))
+        dc: DCPrimitve = parser.parse_args(
+            [
+            ]
+        ).root
+
+        self.assertListEqual(dc.l, [])
+        self.assertListEqual(dc.dl, [4, 5])
+
     def test_data_class_list(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('root', DC)

@@ -11,8 +11,10 @@ def pai_meta(*,
              help=None,
              separator=DEFAULT_SEPARATOR,
              mode='snake',
+             required=None,
              nargs='*',
              ):
+    # TODO: handle required!
     assert(separator in '/._-+')
     assert(mode in {'snake', 'ignore', 'flat'})
     assert(nargs in {'*', '+'})

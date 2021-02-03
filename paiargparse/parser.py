@@ -93,9 +93,9 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
                 # Simple field, but handle enumerations separately
                 if field.list:
                     if field.enum:
-                        arg.value = [str_to_enum(v, field.enum, field.type) for v in values]
+                        arg.value = field.list([str_to_enum(v, field.enum, field.type) for v in values])
                     else:
-                        arg.value = values
+                        arg.value = field.list(values)
                 else:
                     if field.enum:
                         arg.value = str_to_enum(values, field.enum, field.type)
@@ -150,7 +150,7 @@ def _handle_data_class(
             default = getattr(pai_node.default, arg.name) if hasattr(pai_node.default, arg.name) else arg.default
             root_dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                   arg_name=f"{prefix}{param_name}{sep}",
-                                                  type=list if arg.list else arg.type,
+                                                  type=arg.list if arg.list else arg.type,
                                                   default=default,
                                                   value=None,
                                                   )
@@ -208,7 +208,7 @@ class PAIArgumentParser(ArgumentParser):
         param_values = node.all_param_values()
         if node.default:
             # set defaults
-            if node.type not in {list, tuple}:
+            if node.type not in {set, list, tuple}:
                 for arg in extract_args_of_dataclass(node.default.__class__):
                     name = arg.name
                     if name in param_values:
@@ -219,7 +219,7 @@ class PAIArgumentParser(ArgumentParser):
                         continue
                     param_values[name] = getattr(node.default, name)
 
-        if node.type in {list, tuple}:
+        if node.type in {set, list, tuple}:
             dc = node.type([v for k, v in param_values.items()])
         elif node.type == dict:
             return param_values
