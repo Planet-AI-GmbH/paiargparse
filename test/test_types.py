@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import field, dataclass
 from enum import IntEnum, Enum
-from typing import List
+from typing import List, Optional
 
 from paiargparse import PAIArgumentParser, pai_dataclass
 
@@ -21,6 +21,12 @@ class StrEnumEx(str, Enum):
 @pai_dataclass
 @dataclass
 class DifferentTypes:
+    i: int = 0
+    f: float = 0.0
+    b: bool = False
+    oi: Optional[int] = None
+    of: Optional[float] = None
+    ob: Optional[bool] = None
     int_enum: IntEnumEx = IntEnumEx.A
     str_enum: StrEnumEx = StrEnumEx.A
 
@@ -31,6 +37,22 @@ class DifferentTypes:
 
 
 class TestPAIParser(unittest.TestCase):
+    def test_primitives(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('root', DifferentTypes)
+        dt: DifferentTypes = parser.parse_args(
+            [
+                '--root.i', '91',
+                '--root.f', '1.2',
+                '--root.b', 'True',
+                '--root.oi', '11',
+            ]
+        ).root
+        self.assertEqual(91, dt.i)
+        self.assertEqual(1.2, dt.f)
+        self.assertEqual(True, dt.b)
+        self.assertEqual(11, dt.oi)
+
     def test_enum(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('root', DifferentTypes)

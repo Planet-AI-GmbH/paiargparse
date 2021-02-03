@@ -5,7 +5,8 @@ from typing import Any, Dict, NamedTuple
 import importlib
 
 from paiargparse.dataclass_meta import DEFAULT_SEPARATOR
-from paiargparse.dataclass_parser import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices
+from paiargparse.dataclass_parser import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices, \
+    str_to_bool
 from paiargparse.param_tree import PAINode, PAINodeDataClass
 
 
@@ -22,7 +23,7 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
         sep = field.meta.get('separator', DEFAULT_SEPARATOR)
 
         class DictParserDataclassAction(Action):
-            def __call__(self, parser: PAIArgumentParser, args, values, option_string=None):
+            def __call__(self, parser: PAIDataClassArgumentParser, args, values, option_string=None):
                 if len(values) == 1 and values[0] in parser._default_data_classes_to_set_after_next_run:
                     # Parse default (if set)
                     values = values[0]
@@ -77,7 +78,7 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
         return DictParserDataclassAction
     elif field.dict_type:
         class DictParserAction(Action):
-            def __call__(self, parser: PAIArgumentParser, args, values, option_string=None):
+            def __call__(self, parser: PAIDataClassArgumentParser, args, values, option_string=None):
                 # Handle as normal parameter, but split key value pairs at '='
                 arg.value = {}
                 for value in values:
@@ -90,6 +91,11 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
     else:
         class FieldSetterAction(Action):
             def __call__(self, parser, args, values, option_string=None):
+                if field.type == bool:
+                    if isinstance(values, list):
+                        values = list(map(str_to_bool, values))
+                    else:
+                        values = str_to_bool(values)
                 # Simple field, but handle enumerations separately
                 if field.list:
                     if field.enum:
@@ -102,11 +108,12 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
                     else:
                         arg.value = values
 
+
         return FieldSetterAction
 
 
 def _handle_data_class(
-        parser: 'PAIArgumentParser',
+        parser: 'PAIDataClassArgumentParser',
         pai_node: PAINodeDataClass,
         prefix: str,
         parent_pcs: dict,
@@ -167,7 +174,7 @@ def _handle_data_class(
             full_arg_name += arg.name
             root_params[arg.name] = PAINode(name=arg.name, arg_name=full_arg_name, value=MISSING)
             choices = enum_choices(arg.enum) if arg.enum else None
-            arg_type = str if arg.enum or arg.dict_type else arg.type
+            arg_type = str if arg.enum or arg.dict_type or arg.type == bool else arg.type
             parser.add_argument(f"--{full_arg_name}",
                                 default=None if isinstance(arg.default, MISSING.__class__) else arg.default,
                                 help=arg.meta.get('help', "Missing help string"),
@@ -189,14 +196,14 @@ class DefaultArg(NamedTuple):
     value: Any = None
 
 
-class PAIArgumentParser(ArgumentParser):
+class PAIDataClassArgumentParser(ArgumentParser):
     """
     Argument parser based on hierarchical dataclasses
     """
     def __init__(self,
                  formatter_class=ArgumentDefaultsHelpFormatter,
                  *args, **kwargs):
-        super(PAIArgumentParser, self).__init__(add_help=False, formatter_class=formatter_class, *args, **kwargs)
+        super(PAIDataClassArgumentParser, self).__init__(formatter_class=formatter_class, *args, **kwargs)
 
         self._default_data_classes_to_set_after_next_run: Dict[str, DefaultArg] = {}
         self._params_tree = PAINodeDataClass(type=None, name='', arg_name='', value=None)  # Root
@@ -210,7 +217,7 @@ class PAIArgumentParser(ArgumentParser):
         if node.default:
             # set defaults
             if node.type not in {set, list, tuple}:
-                for arg in extract_args_of_dataclass(node.default.__class__):
+                for arg in extract_args_of_dataclass(node.default.__class__, exclude_ignored=False):
                     name = arg.name
                     if name in param_values:
                         # already set from cmd
@@ -275,7 +282,7 @@ class PAIArgumentParser(ArgumentParser):
         pai_node = parent[param_name]
 
         class ListDataClassAction(Action):
-            def __call__(self, parser: 'PAIArgumentParser', args, values, option_string=None):
+            def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
                 if len(values) == 1 and values[0] in parser._default_data_classes_to_set_after_next_run:
                     values = values[0]
                     defaults = parser._default_data_classes_to_set_after_next_run[values]
@@ -304,7 +311,7 @@ class PAIArgumentParser(ArgumentParser):
                     _handle_data_class(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", root_dcs, None, dc_type)
 
         class DataClassAction(Action):
-            def __call__(self, parser: 'PAIArgumentParser', args, values, option_string=None):
+            def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
                 _handle_data_class(parser, pai_node, prefix, root, values)
 
         flag = f'{prefix}{param_name}'
@@ -343,7 +350,7 @@ class PAIArgumentParser(ArgumentParser):
                     args += ['--' + k, k]
                 else:
                     del self._default_data_classes_to_set_after_next_run[k]
-            namespace, args = super(PAIArgumentParser, self).parse_known_args(args, namespace)
+            namespace, args = super(PAIDataClassArgumentParser, self).parse_known_args(args, namespace)
             if args == prev_args:
                 # No changes, stop parsing
                 break
@@ -362,16 +369,10 @@ class PAIArgumentParser(ArgumentParser):
             action='help', default=SUPPRESS,
             help='show this help message and exit')
         if len(args) > 0 and args[0] in {'-h', '--help'}:
-            return super(PAIArgumentParser, self).parse_known_args(args, namespace)
+            return super(PAIDataClassArgumentParser, self).parse_known_args(args, namespace)
 
         return namespace, args
 
     def parse_args(self, args=None, namespace=None):
-        try:
-            args = super(PAIArgumentParser, self).parse_args(args, namespace)
-        except SystemExit:
-            self.print_help(sys.stderr)
-            msg = 'unrecognized arguments: %s'
-            self.error(msg % ' '.join(args))
-
+        args = super(PAIDataClassArgumentParser, self).parse_args(args, namespace)
         return args

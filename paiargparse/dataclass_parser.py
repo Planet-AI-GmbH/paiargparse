@@ -78,7 +78,12 @@ def split_dict_type(dtype):
 
 
 def split_enum_type(etype):
-    is_enum = issubclass(etype, Enum)
+    try:
+        is_enum = issubclass(etype, Enum)
+    except TypeError:
+        # etype is not a type, cant be enum
+        return None, etype
+
     if not is_enum:
         return None, etype
 
@@ -117,11 +122,11 @@ def is_field_required(field):
     return isinstance(field.default, _MISSING_TYPE) and isinstance(field.default_factory, _MISSING_TYPE)
 
 
-def extract_args_of_dataclass(dc) -> List[ArgumentField]:
+def extract_args_of_dataclass(dc, exclude_ignored=True) -> List[ArgumentField]:
     args = []
     for name, field in dc.__dataclass_fields__.items():
         meta: dict = field.metadata
-        if meta.get('mode', 'snake') == 'ignore':
+        if exclude_ignored and meta.get('mode', 'snake') == 'ignore':
             continue
 
         arg = arg_from_field(name, meta, field)
@@ -145,3 +150,7 @@ def str_to_enum(v: str, enum_cls: Type[Enum], enum_type):
             return e
 
     raise ValueError(f"Could not match {v} to any valid key in {enum_cls.__members__.keys()}.")
+
+
+def str_to_bool(v: str) -> bool:
+    return (v.lower() in {'true', 'y', 'yes'}) or (v.isdigit() and int(v) > 0)

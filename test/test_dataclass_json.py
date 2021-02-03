@@ -1,6 +1,6 @@
 import unittest
 
-from paiargparse.parser import PAIArgumentParser
+from paiargparse import PAIArgumentParser
 from test.dataclasse_setup import Level1
 
 
