@@ -142,28 +142,29 @@ def _handle_data_class(
     for arg in extract_args_of_dataclass(dc_type):
         sep = arg.meta.get('separator', DEFAULT_SEPARATOR)
         mode = arg.meta.get('mode', 'snake')
-
-        if mode == 'ignore':
-            continue
+        assert (mode != 'ignore')
+        if mode == 'snake':
+            full_arg_name = f"{prefix}{param_name}{sep}"
+        elif mode == 'flat':
+            full_arg_name = ''
+        else:
+            raise ValueError(f"unsupported mode {mode}.")
 
         if not arg.dict_type and arg.dataclass:
             default = getattr(pai_node.default, arg.name) if hasattr(pai_node.default, arg.name) else arg.default
             root_dcs[arg.name] = PAINodeDataClass(name=arg.name,
-                                                  arg_name=f"{prefix}{param_name}{sep}",
+                                                  arg_name=full_arg_name,
                                                   type=arg.list if arg.list else arg.type,
                                                   default=default,
                                                   value=None,
                                                   )
             parser.add_dc_argument(root_dcs[arg.name].dcs,
-                                   f"{prefix}{param_name}{sep}",
+                                   full_arg_name,
                                    parent=parent_pcs,
                                    arg_field=arg,
                                    )
         else:
-            if mode == 'snake':
-                full_arg_name = f"{prefix}{param_name}{sep}{arg.name}"
-            else:
-                full_arg_name = f"{arg.name}"
+            full_arg_name += arg.name
             root_params[arg.name] = PAINode(name=arg.name, arg_name=full_arg_name, value=MISSING)
             choices = enum_choices(arg.enum) if arg.enum else None
             arg_type = str if arg.enum or arg.dict_type else arg.type
@@ -352,6 +353,9 @@ class PAIArgumentParser(ArgumentParser):
             if len(args) > 0 and args[0] in {'-h', '--help'} and len(self._default_data_classes_to_set_after_next_run) == 0:
                 break
 
+        for name, v in self._params_tree.dcs.items():
+            setattr(namespace, name, self._tree_to_data_class(v))
+
         # add help as last
         self.add_argument(
             '-h', '--help',
@@ -359,11 +363,15 @@ class PAIArgumentParser(ArgumentParser):
             help='show this help message and exit')
         if len(args) > 0 and args[0] in {'-h', '--help'}:
             return super(PAIArgumentParser, self).parse_known_args(args, namespace)
+
         return namespace, args
 
     def parse_args(self, args=None, namespace=None):
-        args = super(PAIArgumentParser, self).parse_args(args, namespace)
+        try:
+            args = super(PAIArgumentParser, self).parse_args(args, namespace)
+        except SystemExit:
+            self.print_help(sys.stderr)
+            msg = 'unrecognized arguments: %s'
+            self.error(msg % ' '.join(args))
 
-        for name, v in self._params_tree.dcs.items():
-            setattr(args, name, self._tree_to_data_class(v))
         return args

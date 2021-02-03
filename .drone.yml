@@ -42,7 +42,8 @@ steps:
     test.test_dict.TestDict.test_primitive_default test.test_dict.TestDict.test_str_dataclass_dict
     test.test_dict.TestDict.test_str_dataclass_dict_default test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
-    test.test_subparser.TestSubParser.test_sub_parser test.test_types.TestPAIParser.test_enum
+    test.test_subparser.TestSubParser.test_sub_parser test.test_subparser.TestSubParser.test_sub_parser_args
+    test.test_subparser.TestSubParser.test_sub_parser_flat test.test_types.TestPAIParser.test_enum
     test.test_types.TestPAIParser.test_enum_list test.test_types.TestPAIParser.test_list
 - name: test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
   image: planet:python3
@@ -445,6 +446,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_subparser.TestSubParser.test_sub_parser_args
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser_args
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_subparser.TestSubParser.test_sub_parser_flat
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser_flat
   when:
     status:
     - failure
@@ -608,7 +639,8 @@ steps:
     test.test_dict.TestDict.test_primitive_default test.test_dict.TestDict.test_str_dataclass_dict
     test.test_dict.TestDict.test_str_dataclass_dict_default test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
-    test.test_subparser.TestSubParser.test_sub_parser test.test_types.TestPAIParser.test_enum
+    test.test_subparser.TestSubParser.test_sub_parser test.test_subparser.TestSubParser.test_sub_parser_args
+    test.test_subparser.TestSubParser.test_sub_parser_flat test.test_types.TestPAIParser.test_enum
     test.test_types.TestPAIParser.test_enum_list test.test_types.TestPAIParser.test_list
 - name: test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
   image: planet:python3
@@ -1011,6 +1043,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_subparser.TestSubParser.test_sub_parser_args
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser_args
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_subparser.TestSubParser.test_sub_parser_flat
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser_flat
   when:
     status:
     - failure
@@ -1168,7 +1230,8 @@ steps:
     test.test_dict.TestDict.test_primitive_default test.test_dict.TestDict.test_str_dataclass_dict
     test.test_dict.TestDict.test_str_dataclass_dict_default test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
-    test.test_subparser.TestSubParser.test_sub_parser test.test_types.TestPAIParser.test_enum
+    test.test_subparser.TestSubParser.test_sub_parser test.test_subparser.TestSubParser.test_sub_parser_args
+    test.test_subparser.TestSubParser.test_sub_parser_flat test.test_types.TestPAIParser.test_enum
     test.test_types.TestPAIParser.test_enum_list test.test_types.TestPAIParser.test_list
 - name: test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
   image: planet:python3
@@ -1571,6 +1634,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_subparser.TestSubParser.test_sub_parser_args
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser_args
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_subparser.TestSubParser.test_sub_parser_flat
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_subparser.TestSubParser.test_sub_parser_flat
   when:
     status:
     - failure
@@ -1732,7 +1825,8 @@ steps:
     test.test_dict.TestDict.test_primitive_default test.test_dict.TestDict.test_str_dataclass_dict
     test.test_dict.TestDict.test_str_dataclass_dict_default test.test_meta.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc_required
-    test.test_subparser.TestSubParser.test_sub_parser test.test_types.TestPAIParser.test_enum
+    test.test_subparser.TestSubParser.test_sub_parser test.test_subparser.TestSubParser.test_sub_parser_args
+    test.test_subparser.TestSubParser.test_sub_parser_flat test.test_types.TestPAIParser.test_enum
     test.test_types.TestPAIParser.test_enum_list test.test_types.TestPAIParser.test_list
 - name: notify
   image: planet:python3

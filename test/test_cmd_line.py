@@ -44,6 +44,6 @@ class TestCmdLine(unittest.TestCase):
         out = check_output([sys.executable,
                             'flat_hierarchical.py',
                             '--req_int', '5',
-                            '--root.child', 'examples.hierarchical.flat_structure:Child2'])
+                            '--child', 'examples.hierarchical.flat_structure:Child2'])
         p = Parent.from_json(out)
         self.assertIsInstance(p.child, Child2)
