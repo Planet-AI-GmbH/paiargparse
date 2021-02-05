@@ -1,7 +1,7 @@
 import sys
 from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
 from dataclasses import MISSING
-from typing import Any, Dict, NamedTuple
+from typing import Any, Dict, NamedTuple, Optional
 import importlib
 
 from paiargparse.dataclass_meta import DEFAULT_SEPARATOR
@@ -119,12 +119,14 @@ def _handle_data_class(
         parent_pcs: dict,
         values: Any,
         dc_type=None,
+        arg_field: Optional[ArgumentField] = None,
 ):
     """
     Add a new sub group to the parser based on the values of a data class
     """
     assert(isinstance(pai_node, PAINodeDataClass))
     param_name = pai_node.name
+    meta = arg_field.meta if arg_field and arg_field.meta else {}
 
     # Add new args for this argument
     if dc_type is None:
@@ -137,12 +139,27 @@ def _handle_data_class(
 
             del parser._default_data_classes_to_set_after_next_run[values]
         else:
-            module, class_name = values.split(":")
-            dc_type = getattr(importlib.import_module(module), class_name)
+            choices = {}
+            if arg_field is not None and meta.get('choices', None) is not None:
+                for choice in meta['choices']:
+                    choices[choice.__name__] = choice
+            if values in choices:
+                dc_type = choices[values]
+            else:
+                try:
+                    module, class_name = values.split(":")
+                except ValueError:
+                    if choices:
+                        raise ValueError(f"Invalid module and class name {values}. Must be 'path.to.module:class_name' or in {list(choices.keys())}")
+                    raise ValueError(f"Invalid module and class name {values}. Must be 'path.to.module:class_name'")
+                dc_type = getattr(importlib.import_module(module), class_name)
 
+        if not meta.get('disable_subclass_check', False) and not issubclass(dc_type, pai_node.type):
+            raise TypeError(f"Data class {dc_type} must in herit {pai_node.type} to allow usage as replacement.")
         pai_node.type = dc_type
     else:
         assert(dc_type == pai_node.type)
+
 
     root_dcs = pai_node.dcs
     root_params = pai_node.params
@@ -312,7 +329,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
 
         class DataClassAction(Action):
             def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
-                _handle_data_class(parser, pai_node, prefix, root, values)
+                _handle_data_class(parser, pai_node, prefix, root, values, arg_field=arg_field)
 
         flag = f'{prefix}{param_name}'
 
@@ -331,10 +348,15 @@ class PAIDataClassArgumentParser(ArgumentParser):
 
         self._default_data_classes_to_set_after_next_run[flag] = default
         action, nargs = make_action()
+        data_class_choices = None
+        if arg_field.meta.get('choices', None) is not None:
+            data_class_choices = [cls.__name__ for cls in arg_field.meta['choices']]
+
         self.add_argument('--' + flag,
                           action=action,
                           type=str,
-                          nargs=nargs
+                          nargs=nargs,
+                          choices=data_class_choices,
                           )
 
     def parse_known_args(self, args=None, namespace=None):

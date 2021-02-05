@@ -23,7 +23,13 @@ class Level2b(Level2):
 
 @pai_dataclass
 @dataclass
-class Level1:
+class Level1Base:
+    pass
+
+
+@pai_dataclass
+@dataclass
+class Level1(Level1Base):
     p1: int = 0
     p2: float = 0.2
     l: Level2 = field(default_factory=Level2)
@@ -31,7 +37,7 @@ class Level1:
 
 @pai_dataclass
 @dataclass
-class Level1b:
+class Level1b(Level1Base):
     p1: int
     p2: str = ''
 

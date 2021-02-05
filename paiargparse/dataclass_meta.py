@@ -1,4 +1,5 @@
 from dataclasses import dataclass, is_dataclass
+from typing import List, Any
 
 from dataclasses_json import dataclass_json
 
@@ -13,11 +14,17 @@ def pai_meta(*,
              mode='snake',
              required=None,
              nargs='*',
+             choices: List[Any] = None,
+             disable_subclass_check=False,
              ):
     # TODO: handle required!
     assert(separator in '/._-+')
     assert(mode in {'snake', 'ignore', 'flat'})
     assert(nargs in {'*', '+'})
+    if choices is not None:
+        data_class_choices = [cls.__name__ for cls in choices]
+        if len(set(data_class_choices)) != len(data_class_choices):
+            raise ValueError(f"Class names must be unique in pai_meta(choices): {data_class_choices}")
     return locals()
 
 

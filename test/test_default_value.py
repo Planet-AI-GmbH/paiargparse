@@ -1,7 +1,7 @@
 import unittest
 
 from paiargparse import PAIArgumentParser, RequiredArgumentError
-from test.dataclasse_setup import Level1b, Level1, Level2a, Level2
+from test.dataclasse_setup import Level1b, Level1, Level2a, Level2, Level1Base
 
 
 class TestPAIParserDefault(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestPAIParserDefault(unittest.TestCase):
 
     def test_setting_argument_after_override(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('arg', Level1, default=Level1b(p1=-1))
+        parser.add_root_argument('arg', Level1Base, default=Level1b(p1=-1))
         with self.assertRaises(SystemExit):
             parser.parse_args(args=['--arg.l.p1', '-13'])
 
