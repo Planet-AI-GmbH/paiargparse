@@ -10,11 +10,19 @@ from dataclasses_json.core import _user_overrides_or_exts, _decode_letter_case_o
 from dataclasses_json.utils import _handle_undefined_parameters_safe, _is_optional, _is_new_type
 from dataclasses_json.api import A
 from dataclasses_json.core import Json
+import dataclasses_json
 
 
 def _decode_dataclass(cls, kvs, infer_missing):
     if isinstance(kvs, cls):
         return kvs
+
+    # >>> OVERRIDE TYPE
+    if '__cls__' in kvs and kvs['__cls__'] != cls.__module__ + ':' + cls.__name__:
+        module, name = kvs['__cls__'].split(":")
+        cls = getattr(importlib.import_module(module), name)
+    # <<< END
+
     overrides = _user_overrides_or_exts(cls)
     kvs = {} if kvs is None and infer_missing else kvs
     field_names = [field.name for field in fields(cls)]
@@ -79,11 +87,6 @@ def _decode_dataclass(cls, kvs, infer_missing):
             if is_dataclass(field_value):
                 value = field_value
             else:
-                # >>> OVERRIDE TYPE
-                if '__cls__' in field_value and field_value['__cls__'] != field_type.__module__ + ':' + field_type.__name__:
-                    module, name = field_value['__cls__'].split(":")
-                    field_type = getattr(importlib.import_module(module), name)
-                # <<< END
                 value = _decode_dataclass(field_type, field_value,
                                           infer_missing)
             init_kwargs[field.name] = value
@@ -141,3 +144,8 @@ class PaiDataClassMixin(ABC):
     def to_dict(self, encode_json=False) -> Dict[str, Json]:
         d = _asdict(self, encode_json=encode_json)
         return d
+
+
+# Override dataclass_json functions to include custom adaptions
+dataclasses_json.core._decode_dataclass = _decode_dataclass
+dataclasses_json.core._asdict = _asdict

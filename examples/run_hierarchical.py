@@ -1,4 +1,4 @@
-from examples.hierarchical.structure import Parent
+from examples.structures.hierarchical import Parent
 from paiargparse import PAIArgumentParser
 
 
