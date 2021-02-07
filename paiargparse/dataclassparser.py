@@ -1,5 +1,5 @@
 import sys
-from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
+from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace, ArgumentError
 from dataclasses import MISSING
 from typing import Any, Dict, NamedTuple, Optional
 import importlib
@@ -12,6 +12,18 @@ from paiargparse.param_tree import PAINode, PAINodeDataClass
 
 class RequiredArgumentError(Exception):
     pass
+
+
+class InvalidChoiceError(Exception):
+    pass
+
+
+def type_to_str(t, separator=':'):
+    return f"{t.__module__}{separator}{t.__name__}"
+
+
+def default_dict_key_value(arg: 'DefaultArg'):
+    return arg.arg_name
 
 
 def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentField):
@@ -108,7 +120,6 @@ def _setter_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentFiel
                     else:
                         arg.value = values
 
-
         return FieldSetterAction
 
 
@@ -127,6 +138,9 @@ def _handle_data_class(
     assert(isinstance(pai_node, PAINodeDataClass))
     param_name = pai_node.name
     meta = arg_field.meta if arg_field and arg_field.meta else {}
+    data_class_choices = None
+    if meta.get('choices', None) is not None:
+        data_class_choices = [cls.__name__ for cls in arg_field.meta['choices']]
 
     # Add new args for this argument
     if dc_type is None:
@@ -160,6 +174,9 @@ def _handle_data_class(
     else:
         assert(dc_type == pai_node.type)
 
+    if data_class_choices is not None:
+        if dc_type.__name__ not in data_class_choices:
+            raise InvalidChoiceError(f"invalid choice: {dc_type.__name__} (chose from {', '.join(data_class_choices)})")
 
     root_dcs = pai_node.dcs
     root_params = pai_node.params
@@ -204,13 +221,15 @@ def _handle_data_class(
                 default = DefaultArg(
                     dict,
                     getattr(pai_node.default, arg.name, None),
+                    full_arg_name,
                 )
-                parser._default_data_classes_to_set_after_next_run[full_arg_name] = default
+                parser._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
 
 
 class DefaultArg(NamedTuple):
-    dc_type: Any = None
-    value: Any = None
+    dc_type: Any
+    value: Any
+    arg_name: str
 
 
 class PAIDataClassArgumentParser(ArgumentParser):
@@ -336,6 +355,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
         default = DefaultArg(
             dc_type,
             pai_node.default,
+            flag,
         )
 
         def make_action():
@@ -346,17 +366,13 @@ class PAIDataClassArgumentParser(ArgumentParser):
             else:
                 return DataClassAction, None
 
-        self._default_data_classes_to_set_after_next_run[flag] = default
+        self._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
         action, nargs = make_action()
-        data_class_choices = None
-        if arg_field.meta.get('choices', None) is not None:
-            data_class_choices = [cls.__name__ for cls in arg_field.meta['choices']]
 
         self.add_argument('--' + flag,
                           action=action,
                           type=str,
                           nargs=nargs,
-                          choices=data_class_choices,
                           )
 
     def parse_known_args(self, args=None, namespace=None):
@@ -368,8 +384,9 @@ class PAIDataClassArgumentParser(ArgumentParser):
         prev_args = args
         while len(args) > 0 or len(self._default_data_classes_to_set_after_next_run) > 0:
             for k, v in list(self._default_data_classes_to_set_after_next_run.items()):
+                v: DefaultArg = v
                 if f'--{k}' not in orig_args:
-                    args += ['--' + k, k]
+                    args += ['--' + k, default_dict_key_value(v)]
                 else:
                     del self._default_data_classes_to_set_after_next_run[k]
             namespace, args = super(PAIDataClassArgumentParser, self).parse_known_args(args, namespace)

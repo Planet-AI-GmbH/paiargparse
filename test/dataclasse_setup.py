@@ -2,11 +2,29 @@ from dataclasses import field, dataclass
 
 from paiargparse import pai_meta, pai_dataclass
 
+@pai_dataclass
+@dataclass
+class Level3base:
+    p: int = 1
+
+
+@pai_dataclass
+@dataclass
+class Level3a(Level3base):
+    t: float = 2
+
+
+@pai_dataclass
+@dataclass
+class Level3aa(Level3a):
+    q: int = 3
+
 
 @pai_dataclass
 @dataclass
 class Level2:
     p1: int = 0
+    lvl3: Level3base = field(default_factory=Level3a, metadata=pai_meta(choices=[Level3a, Level3aa]))
 
 
 @pai_dataclass

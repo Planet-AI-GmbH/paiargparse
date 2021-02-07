@@ -30,6 +30,7 @@ steps:
   - echo $PWD
   - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
+    test.test_data_class.TestPAIParser.test_invalid_choice test.test_data_class.TestPAIParser.test_invalid_selection
     test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
     test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
     test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
@@ -87,6 +88,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_invalid_choice
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_invalid_choice
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_invalid_selection
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_invalid_selection
   when:
     status:
     - failure
@@ -643,6 +674,7 @@ steps:
   - echo $PWD
   - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
+    test.test_data_class.TestPAIParser.test_invalid_choice test.test_data_class.TestPAIParser.test_invalid_selection
     test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
     test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
     test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
@@ -700,6 +732,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_invalid_choice
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_invalid_choice
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_invalid_selection
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_invalid_selection
   when:
     status:
     - failure
@@ -1250,6 +1312,7 @@ steps:
   - echo $PWD
   - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
+    test.test_data_class.TestPAIParser.test_invalid_choice test.test_data_class.TestPAIParser.test_invalid_selection
     test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
     test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
     test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
@@ -1307,6 +1370,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_invalid_choice
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_invalid_choice
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_invalid_selection
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_invalid_selection
   when:
     status:
     - failure
@@ -1861,6 +1954,7 @@ steps:
   - echo $PWD
   - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
+    test.test_data_class.TestPAIParser.test_invalid_choice test.test_data_class.TestPAIParser.test_invalid_selection
     test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_single_dc
     test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
     test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
