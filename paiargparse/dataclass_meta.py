@@ -1,4 +1,4 @@
-from dataclasses import dataclass, is_dataclass
+from dataclasses import is_dataclass
 from typing import List, Any
 
 from dataclasses_json import dataclass_json
@@ -18,10 +18,9 @@ def pai_meta(*,
              disable_subclass_check=False,
              enforce_choices=False,
              ):
-    # TODO: handle required!
-    assert(separator in '/._-+')
-    assert(mode in {'snake', 'ignore', 'flat'})
-    assert(nargs in {'*', '+'})
+    assert (separator in '/._-+')
+    assert (mode in {'snake', 'ignore', 'flat'})
+    assert (nargs in {'*', '+'})
     if choices is not None:
         data_class_choices = [cls.__name__ for cls in choices]
         if len(set(data_class_choices)) != len(data_class_choices):
@@ -51,7 +50,7 @@ def pai_dataclass(_cls=None):
 
 def _process_class(cls):
     # apply dataclass_json, dataclass must be assigned manually for intellisense
-    assert(is_dataclass(cls))
+    assert (is_dataclass(cls))
     cls = dataclass_json(cls)
 
     # override to dict and from dict
@@ -59,5 +58,3 @@ def _process_class(cls):
     cls.from_dict = classmethod(PaiDataClassMixin.from_dict.__func__)
     PaiDataClassMixin.register(cls)
     return cls
-
-

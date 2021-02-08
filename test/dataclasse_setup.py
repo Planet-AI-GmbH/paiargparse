@@ -76,3 +76,7 @@ class TestMetaLevel1:
     ))
 
 
+@pai_dataclass
+@dataclass
+class TestWithRequiredMeta:
+    p: int = field(default=1, metadata=pai_meta(required=True))
