@@ -174,7 +174,7 @@ def _handle_data_class(
     else:
         assert(dc_type == pai_node.type)
 
-    if data_class_choices is not None:
+    if meta.get('enforce_choices', False) and data_class_choices is not None:
         if dc_type.__name__ not in data_class_choices:
             raise InvalidChoiceError(f"invalid choice: {dc_type.__name__} (chose from {', '.join(data_class_choices)})")
 

@@ -16,6 +16,7 @@ def pai_meta(*,
              nargs='*',
              choices: List[Any] = None,
              disable_subclass_check=False,
+             enforce_choices=False,
              ):
     # TODO: handle required!
     assert(separator in '/._-+')
@@ -25,6 +26,8 @@ def pai_meta(*,
         data_class_choices = [cls.__name__ for cls in choices]
         if len(set(data_class_choices)) != len(data_class_choices):
             raise ValueError(f"Class names must be unique in pai_meta(choices): {data_class_choices}")
+    if enforce_choices and choices is None:
+        raise ValueError("If enforcing choices, choices are required.")
     return locals()
 
 

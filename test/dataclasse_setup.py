@@ -24,7 +24,7 @@ class Level3aa(Level3a):
 @dataclass
 class Level2:
     p1: int = 0
-    lvl3: Level3base = field(default_factory=Level3a, metadata=pai_meta(choices=[Level3a, Level3aa]))
+    lvl3: Level3base = field(default_factory=Level3a, metadata=pai_meta(choices=[Level3a, Level3aa], enforce_choices=True))
 
 
 @pai_dataclass
