@@ -8,7 +8,7 @@ this_dir = os.path.dirname(os.path.realpath(__file__))
 setup(
     name='paiargparse',
     version=__version__,
-    packages=find_packages(exclude=['test/*']),
+    packages=find_packages(exclude=['test/*', 'examples/*']),
     license='MIT',
     long_description=open(os.path.join(this_dir, "README.md")).read(),
     long_description_content_type="text/markdown",
