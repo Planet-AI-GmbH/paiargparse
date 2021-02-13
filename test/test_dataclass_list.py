@@ -7,8 +7,15 @@ from paiargparse import pai_dataclass, PAIArgumentParser
 
 @pai_dataclass
 @dataclass
+class SubSub:
+    int_arg: int = -2
+
+
+@pai_dataclass
+@dataclass
 class Sub:
     int_arg: int = -1
+    sub_sub: SubSub = field(default_factory=SubSub)
 
 
 @pai_dataclass
@@ -61,11 +68,12 @@ class TestDataClassList(unittest.TestCase):
             [
                 '--root.l', 'test.test_dataclass_list:Sub', 'test.test_dataclass_list:Sub',
                 '--root.l.1.int_arg', '-2',
+                '--root.l.0.sub_sub.int_arg', '10',
             ]
         ).root
 
         self.assertListEqual(
-            [Sub(int_arg=-1), Sub(int_arg=-2)],
+            [Sub(int_arg=-1, sub_sub=SubSub(int_arg=10)), Sub(int_arg=-2)],
             dc.l
         )
 

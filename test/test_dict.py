@@ -4,11 +4,17 @@ from typing import Dict
 
 from paiargparse import pai_dataclass, PAIArgumentParser
 
+@pai_dataclass
+@dataclass
+class SubSub:
+    int_arg: int = -2
+
 
 @pai_dataclass
 @dataclass
 class Sub:
     p: int = 0
+    sub_sub: SubSub = field(default_factory=SubSub)
 
 
 @pai_dataclass
@@ -55,6 +61,7 @@ class TestDict(unittest.TestCase):
             '--dc.str_dc', 'a=test.test_dict:Sub', 'b=test.test_dict:Sub2', 'c',
             '--dc.str_dc.a.p', '1',
             '--dc.str_dc.b.x', 'test',
+            '--dc.str_dc.a.sub_sub.int_arg', '10',
         ]).dc
 
         self.assertListEqual(['a', 'b', 'c'], list(dc.str_dc.keys()))
@@ -63,6 +70,7 @@ class TestDict(unittest.TestCase):
         self.assertIsInstance(dc.str_dc['c'], Sub)
         self.assertEqual(dc.str_dc['a'].p, 1)
         self.assertEqual(dc.str_dc['b'].x, 'test')
+        self.assertEqual(dc.str_dc['a'].sub_sub.int_arg, 10)
 
     def test_str_dataclass_dict_default(self):
         parser = PAIArgumentParser()

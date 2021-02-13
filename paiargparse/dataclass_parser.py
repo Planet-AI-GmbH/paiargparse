@@ -85,7 +85,7 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                                                    value=None,
                                                    )
                     add_dataclass_field(parser, root_dcs[k], f"{arg.arg_name}{sep}",
-                                        root_dcs, None, dc_type)
+                                        root_dcs[k].dcs, None, dc_type)
 
         return DictParserDataclassAction
     elif field.dict_type:
@@ -364,7 +364,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
                                                         default=default,
                                                         value=None,
                                                         )
-                    add_dataclass_field(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", root_dcs, None, dc_type)
+                    add_dataclass_field(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", root_dcs[str(i)].dcs, None, dc_type)
 
         class DataClassAction(Action):
             def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
