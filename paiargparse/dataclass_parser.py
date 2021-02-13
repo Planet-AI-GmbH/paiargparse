@@ -257,8 +257,8 @@ class PAIDataClassArgumentParser(ArgumentParser):
 
         # construct actual dataclass
         param_values = node.all_param_values()
-        if node.default:
-            # set defaults
+        if node.default and issubclass(node.type, node.default.__class__):
+            # set defaults, but only if we are sure that the types are compatible
             if node.type not in {set, list, tuple}:
                 for arg in extract_args_of_dataclass(node.default.__class__, exclude_ignored=False):
                     name = arg.name
