@@ -146,7 +146,9 @@ def add_dataclass_field(
     if dc_type is None:
         if values in parser._default_data_classes_to_set_after_next_run:
             v = parser._default_data_classes_to_set_after_next_run[values]
-            if v.value:
+            if v.value == MISSING:
+                raise RequiredArgumentError(f'The following argument is required: {v.arg_name}')
+            elif v.value is not None:
                 dc_type = v.value.__class__
             else:
                 dc_type = v.dc_type
@@ -290,7 +292,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
                                          field.name not in param_values and field.meta and field.meta.get('required')]
                 if len(missing_meta_required) > 0:
                     raise RequiredArgumentError(
-                        'The following arguments are required: {}'.format(', '.join(missing_required)))
+                        'The following arguments are required: {}'.format(', '.join(missing_meta_required)))
 
             # Instantiate the real class
             dc = node.type(**param_values)

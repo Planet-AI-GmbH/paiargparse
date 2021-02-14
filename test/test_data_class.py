@@ -2,7 +2,8 @@ import unittest
 
 from paiargparse import PAIArgumentParser, RequiredArgumentError
 from paiargparse.dataclass_parser import InvalidChoiceError
-from test.dataclasse_setup import Level1b, Level2, Level1, Level2a, Level3a, Level3base, TestWithRequiredMeta
+from test.dataclasse_setup import Level1b, Level2, Level1, Level2a, Level3a, Level3base, TestWithRequiredMeta, \
+    Level1Required
 
 
 class TestPAIParser(unittest.TestCase):
@@ -37,6 +38,12 @@ class TestPAIParser(unittest.TestCase):
         parser.add_root_argument('arg', Level1b)
         with self.assertRaises(RequiredArgumentError):
             parser.parse_args(args=['--arg.p2', 'test'])
+
+    def test_required_dataclass(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('arg', Level1Required)
+        with self.assertRaises(RequiredArgumentError):
+            parser.parse_args()
 
     def test_required_via_meta(self):
         parser = PAIArgumentParser()

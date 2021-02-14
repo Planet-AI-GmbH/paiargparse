@@ -62,6 +62,12 @@ class Level1b(Level1Base):
 
 @pai_dataclass
 @dataclass
+class Level1Required:
+    pdc: Level2
+
+
+@pai_dataclass
+@dataclass
 class TestMetaLevel2:
     p: str = field(default='', metadata=pai_meta(separator='+'))
 
