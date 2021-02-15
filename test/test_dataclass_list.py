@@ -2,7 +2,8 @@ import unittest
 from dataclasses import field, dataclass
 from typing import List
 
-from paiargparse import pai_dataclass, PAIArgumentParser
+from paiargparse import pai_dataclass, PAIArgumentParser, pai_meta
+from paiargparse.dataclass_parser import InvalidChoiceError
 
 
 @pai_dataclass
@@ -35,6 +36,7 @@ class DCWithDefault:
 class DCPrimitve:
     l: List[int] = field(default_factory=list)
     dl: List[int] = field(default_factory=lambda: [1, 2])
+    dlc: List[int] = field(default_factory=list, metadata=pai_meta(choices=[4, 5, 2]))
 
 
 class TestDataClassList(unittest.TestCase):
@@ -104,3 +106,15 @@ class TestDataClassList(unittest.TestCase):
             [Sub(int_arg=-2), Sub(int_arg=-4)],
             dc.l
         )
+
+    def test_data_class_list_with_choices(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('root', DCPrimitve)
+        dc: DCPrimitve = parser.parse_args(['--root.dlc', '2', '2', '5']).root
+        self.assertListEqual(dc.dlc, [2, 2, 5])
+
+    def test_data_class_list_with_choices_not_available(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('root', DCPrimitve)
+        with self.assertRaises(SystemExit):
+            dc: DCPrimitve = parser.parse_args(['--root.dlc', '2', '2', '50']).root

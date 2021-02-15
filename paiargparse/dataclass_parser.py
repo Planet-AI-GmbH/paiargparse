@@ -211,6 +211,8 @@ def add_dataclass_field(
             full_arg_name += arg.name
             root_params[arg.name] = PAINode(name=arg.name, arg_name=full_arg_name, value=MISSING)
             choices = enum_choices(arg.enum) if arg.enum else None
+            if arg.meta.get('enforce_choices', True) and arg.meta.get('choices', None) is not None:
+                choices = arg.meta.get('choices')
             arg_type = str if arg.enum or arg.dict_type or arg.type == bool else arg.type
             parser.add_argument(f"--{full_arg_name}",
                                 default=None if isinstance(arg.default, MISSING.__class__) else arg.default,

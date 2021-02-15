@@ -16,15 +16,26 @@ def pai_meta(*,
              nargs='*',
              choices: List[Any] = None,
              disable_subclass_check=False,
-             enforce_choices=False,
+             enforce_choices=None,  # if choices are dataclass, defaults to False, else True
              ):
     assert (separator in '/._-+')
     assert (mode in {'snake', 'ignore', 'flat'})
     assert (nargs in {'*', '+'})
     if choices is not None:
-        data_class_choices = [cls.__name__ for cls in choices]
+        data_class_choices = [cls.__name__ for cls in choices if is_dataclass(cls)]
         if len(set(data_class_choices)) != len(data_class_choices):
             raise ValueError(f"Class names must be unique in pai_meta(choices): {data_class_choices}")
+        primitive_choices = [cls for cls in choices if not is_dataclass(cls)]
+        if len(set(primitive_choices)) != len(primitive_choices):
+            raise ValueError(f"Choices must be unique in pai_meta(choices): {primitive_choices}")
+        if len(data_class_choices) > 0 and len(primitive_choices):
+            raise ValueError(f"Mixing of dataclasses and primitive types is not supported.")
+        if enforce_choices is None:
+            if data_class_choices:
+                enforce_choices = False
+            elif primitive_choices:
+                enforce_choices = True
+
     if enforce_choices and choices is None:
         raise ValueError("If enforcing choices, choices are required.")
     return locals()
