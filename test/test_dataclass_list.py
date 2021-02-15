@@ -3,7 +3,6 @@ from dataclasses import field, dataclass
 from typing import List
 
 from paiargparse import pai_dataclass, PAIArgumentParser, pai_meta
-from paiargparse.dataclass_parser import InvalidChoiceError
 
 
 @pai_dataclass

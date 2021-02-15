@@ -33,6 +33,12 @@ class TestPAIParser(unittest.TestCase):
             args = parser.parse_args(args=['--arg.p1', '0',
                                            '--arg.l.lvl3', 'test.test_data_class:Level3base'])
 
+    def test_choice_by_alt_name(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('arg', Level1)
+        args = parser.parse_args(args=['--arg.p1', '0',
+                                       '--arg.l.lvl3', 'AlternativeLevel3'])
+
     def test_required(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('arg', Level1b)

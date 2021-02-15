@@ -30,13 +30,13 @@ steps:
   - echo $PWD
   - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
-    test.test_data_class.TestPAIParser.test_invalid_choice test.test_data_class.TestPAIParser.test_invalid_selection
-    test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_required_dataclass
-    test.test_data_class.TestPAIParser.test_required_via_meta test.test_data_class.TestPAIParser.test_single_dc
-    test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
-    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_default test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
+    test.test_data_class.TestPAIParser.test_choice_by_alt_name test.test_data_class.TestPAIParser.test_invalid_choice
+    test.test_data_class.TestPAIParser.test_invalid_selection test.test_data_class.TestPAIParser.test_required
+    test.test_data_class.TestPAIParser.test_required_dataclass test.test_data_class.TestPAIParser.test_required_via_meta
+    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_dataclass_list.TestDataClassList.test_data_class_list test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
     test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default test.test_dataclass_list.TestDataClassList.test_primitive_list
     test.test_dataclass_list.TestDataClassList.test_primitive_list_default test.test_dataclass_set.TestDataClassList.test_primitive_set
     test.test_dataclass_set.TestDataClassList.test_primitive_set_default test.test_default_value.TestPAIParserDefault.test_required
@@ -90,6 +90,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_choice_by_alt_name
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_choice_by_alt_name
   when:
     status:
     - failure
@@ -736,13 +751,13 @@ steps:
   - echo $PWD
   - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
-    test.test_data_class.TestPAIParser.test_invalid_choice test.test_data_class.TestPAIParser.test_invalid_selection
-    test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_required_dataclass
-    test.test_data_class.TestPAIParser.test_required_via_meta test.test_data_class.TestPAIParser.test_single_dc
-    test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
-    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_default test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
+    test.test_data_class.TestPAIParser.test_choice_by_alt_name test.test_data_class.TestPAIParser.test_invalid_choice
+    test.test_data_class.TestPAIParser.test_invalid_selection test.test_data_class.TestPAIParser.test_required
+    test.test_data_class.TestPAIParser.test_required_dataclass test.test_data_class.TestPAIParser.test_required_via_meta
+    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_dataclass_list.TestDataClassList.test_data_class_list test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
     test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default test.test_dataclass_list.TestDataClassList.test_primitive_list
     test.test_dataclass_list.TestDataClassList.test_primitive_list_default test.test_dataclass_set.TestDataClassList.test_primitive_set
     test.test_dataclass_set.TestDataClassList.test_primitive_set_default test.test_default_value.TestPAIParserDefault.test_required
@@ -796,6 +811,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_choice_by_alt_name
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_choice_by_alt_name
   when:
     status:
     - failure
@@ -1436,13 +1466,13 @@ steps:
   - echo $PWD
   - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
-    test.test_data_class.TestPAIParser.test_invalid_choice test.test_data_class.TestPAIParser.test_invalid_selection
-    test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_required_dataclass
-    test.test_data_class.TestPAIParser.test_required_via_meta test.test_data_class.TestPAIParser.test_single_dc
-    test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
-    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_default test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
+    test.test_data_class.TestPAIParser.test_choice_by_alt_name test.test_data_class.TestPAIParser.test_invalid_choice
+    test.test_data_class.TestPAIParser.test_invalid_selection test.test_data_class.TestPAIParser.test_required
+    test.test_data_class.TestPAIParser.test_required_dataclass test.test_data_class.TestPAIParser.test_required_via_meta
+    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_dataclass_list.TestDataClassList.test_data_class_list test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
     test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default test.test_dataclass_list.TestDataClassList.test_primitive_list
     test.test_dataclass_list.TestDataClassList.test_primitive_list_default test.test_dataclass_set.TestDataClassList.test_primitive_set
     test.test_dataclass_set.TestDataClassList.test_primitive_set_default test.test_default_value.TestPAIParserDefault.test_required
@@ -1496,6 +1526,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_cmd_line.TestCmdLine.test_single_dc
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_choice_by_alt_name
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_choice_by_alt_name
   when:
     status:
     - failure
@@ -2140,13 +2185,13 @@ steps:
   - echo $PWD
   - PYTHONPATH=$PWD /root/venv/bin/python drone/integrity_check.py test.test_cmd_line.TestCmdLine.test_flat_hierarchical_dc
     test.test_cmd_line.TestCmdLine.test_hierarchical_dc test.test_cmd_line.TestCmdLine.test_single_dc
-    test.test_data_class.TestPAIParser.test_invalid_choice test.test_data_class.TestPAIParser.test_invalid_selection
-    test.test_data_class.TestPAIParser.test_required test.test_data_class.TestPAIParser.test_required_dataclass
-    test.test_data_class.TestPAIParser.test_required_via_meta test.test_data_class.TestPAIParser.test_single_dc
-    test.test_data_class.TestPAIParser.test_two_dc test.test_data_class.TestPAIParser.test_two_dc_change
-    test.test_dataclass_json.TestPAIParser.test_two_dc_change test.test_dataclass_list.TestDataClassList.test_data_class_list
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_default test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
+    test.test_data_class.TestPAIParser.test_choice_by_alt_name test.test_data_class.TestPAIParser.test_invalid_choice
+    test.test_data_class.TestPAIParser.test_invalid_selection test.test_data_class.TestPAIParser.test_required
+    test.test_data_class.TestPAIParser.test_required_dataclass test.test_data_class.TestPAIParser.test_required_via_meta
+    test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_dataclass_list.TestDataClassList.test_data_class_list test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
     test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default test.test_dataclass_list.TestDataClassList.test_primitive_list
     test.test_dataclass_list.TestDataClassList.test_primitive_list_default test.test_dataclass_set.TestDataClassList.test_primitive_set
     test.test_dataclass_set.TestDataClassList.test_primitive_set_default test.test_default_value.TestPAIParserDefault.test_required

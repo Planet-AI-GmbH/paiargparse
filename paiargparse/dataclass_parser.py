@@ -140,7 +140,7 @@ def add_dataclass_field(
     meta = arg_field.meta if arg_field and arg_field.meta else {}
     data_class_choices = None
     if meta.get('choices', None) is not None:
-        data_class_choices = [cls.__name__ for cls in arg_field.meta['choices']]
+        data_class_choices = list(filter(lambda x: x, sum([[cls.__name__, cls.__alt_name__] for cls in arg_field.meta['choices']], [])))
 
     # Add new args for this argument
     if dc_type is None:
@@ -159,6 +159,8 @@ def add_dataclass_field(
             if arg_field is not None and meta.get('choices', None) is not None:
                 for choice in meta['choices']:
                     choices[choice.__name__] = choice
+                    if hasattr(choice, '__alt_name__') and choice.__alt_name__:
+                        choices[choice.__alt_name__] = choice
             if values in choices:
                 dc_type = choices[values]
             else:

@@ -41,7 +41,7 @@ def pai_meta(*,
     return locals()
 
 
-def pai_dataclass(_cls=None):
+def pai_dataclass(_cls=None, alt=None):
     """
     Based on the code in the `dataclasses` module to handle optional-parens
     decorators. See example below:
@@ -49,9 +49,12 @@ def pai_dataclass(_cls=None):
     @pai_dataclass
     class Example:
         ...
+
+    alt allows you to specify an alternative name for this class that can be used if listed in pai_meta choices.
     """
 
     def wrap(cls):
+        setattr(cls, '__alt_name__', alt)
         return _process_class(cls)
 
     if _cls is None:

@@ -14,7 +14,7 @@ class Level3a(Level3base):
     t: float = 2
 
 
-@pai_dataclass
+@pai_dataclass(alt="AlternativeLevel3")
 @dataclass
 class Level3aa(Level3a):
     q: int = 3
