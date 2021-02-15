@@ -193,6 +193,8 @@ def add_dataclass_field(
             full_arg_name = f"{prefix}{param_name}{sep}"
         elif mode == 'flat':
             full_arg_name = ''
+        elif mode == 'ssnake':
+            full_arg_name = prefix  # ignore previous param name and separator
         else:
             raise ValueError(f"unsupported mode {mode}.")
 

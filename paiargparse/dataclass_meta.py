@@ -19,7 +19,7 @@ def pai_meta(*,
              enforce_choices=None,  # if choices are dataclass, defaults to False, else True
              ):
     assert (separator in '/._-+')
-    assert (mode in {'snake', 'ignore', 'flat'})
+    assert (mode in {'snake', 'ignore', 'flat', 'ssnake'})
     assert (nargs in {'*', '+'})
     if choices is not None:
         data_class_choices = [cls.__name__ for cls in choices if is_dataclass(cls)]
