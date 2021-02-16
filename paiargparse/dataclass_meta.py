@@ -42,7 +42,18 @@ def pai_meta(*,
     return locals()
 
 
-def pai_dataclass(_cls=None, alt=None):
+def set_attr_forbid_unknown(cls):
+    def __setattr__(self, key, value):
+        if key not in self.__class__.__dataclass_fields__:
+            raise AttributeError(
+                f"Class {self.__class__} has no attribute {key}. "
+                f"Available fields: {', '.join(self.__class__.__dataclass_fields__.keys())}")
+        else:
+            return super(cls, self).__setattr__(key, value)
+    return __setattr__
+
+
+def pai_dataclass(_cls=None, alt=None, no_assign_to_unknown=True):
     """
     Based on the code in the `dataclasses` module to handle optional-parens
     decorators. See example below:
@@ -56,7 +67,10 @@ def pai_dataclass(_cls=None, alt=None):
 
     def wrap(cls):
         setattr(cls, '__alt_name__', alt)
-        return _process_class(cls)
+        cls = _process_class(cls)
+        if no_assign_to_unknown:
+            setattr(cls, '__setattr__', set_attr_forbid_unknown(cls))
+        return cls
 
     if _cls is None:
         return wrap
