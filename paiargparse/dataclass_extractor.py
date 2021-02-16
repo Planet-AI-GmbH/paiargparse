@@ -1,6 +1,6 @@
 from dataclasses import dataclass, _MISSING_TYPE
 from enum import Enum
-from typing import Any, List, Type, Optional, Tuple, Union
+from typing import Any, List, Type, Optional, Tuple, Union, TypeVar
 
 SUPPORTED_ENUM_TYPES = {int, str, float}
 
@@ -102,6 +102,12 @@ def arg_from_field(name, meta, field) -> ArgumentField:
     is_list, t = split_list_type(t)
     t, dict_type = split_dict_type(t)
     enum_class, t = split_enum_type(t)
+    if isinstance(t, TypeVar):
+        if not hasattr(t, '__bound__'):
+            raise ValueError(f"A TypeVar must have field 'bound' set.")
+        else:
+            t = t.__bound__
+
     if dict_type:
         is_dataclass = hasattr(dict_type, '__dataclass_fields__')
     else:

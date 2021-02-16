@@ -17,6 +17,7 @@ def pai_meta(*,
              choices: List[Any] = None,
              disable_subclass_check=False,
              enforce_choices=None,  # if choices are dataclass, defaults to False, else True
+             fix_dc=False,  # if True, the dataclass can not be overwritten
              ):
     assert (separator in '/._-+')
     assert (mode in {'snake', 'ignore', 'flat', 'ssnake'})

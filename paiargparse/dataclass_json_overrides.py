@@ -3,7 +3,7 @@ import importlib
 import warnings
 from abc import ABC
 from dataclasses import fields, MISSING, is_dataclass, _is_dataclass_instance
-from typing import get_type_hints, Dict, Type, Mapping, Collection
+from typing import get_type_hints, Dict, Type, Mapping, Collection, TypeVar
 
 from dataclasses_json.core import _user_overrides_or_exts, _decode_letter_case_overrides, _decode_generic, \
     _is_supported_generic, _support_extended_types, _encode_overrides
@@ -51,6 +51,15 @@ def _decode_dataclass(cls, kvs, infer_missing):
 
         field_value = kvs[field.name]
         field_type = types[field.name]
+        # >>> Support for Generic Types
+        if isinstance(field_type, TypeVar):
+            if not hasattr(field_type, '__bound__'):
+                warnings.warn(
+                    f"If using TypeVars, set the bound field for obtaining the default type. "
+                )
+            else:
+                field_type = field_type.__bound__
+        # <<< Support for Generic Types
         if field_value is None and not _is_optional(field_type):
             warning = (f"value of non-optional type {field.name} detected "
                        f"when decoding {cls.__name__}")

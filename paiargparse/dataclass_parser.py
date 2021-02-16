@@ -2,7 +2,7 @@ import importlib
 import sys
 from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
 from dataclasses import MISSING
-from typing import Any, Dict, NamedTuple, Optional
+from typing import Any, Dict, NamedTuple, Optional, TypeVar
 
 from paiargparse.dataclass_extractor import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices, \
     str_to_bool
@@ -174,7 +174,7 @@ def add_dataclass_field(
                 dc_type = getattr(importlib.import_module(module), class_name)
 
         if not meta.get('disable_subclass_check', False) and not issubclass(dc_type, pai_node.type):
-            raise TypeError(f"Data class {dc_type} must in herit {pai_node.type} to allow usage as replacement.")
+            raise TypeError(f"Data class {dc_type} must inherit {pai_node.type} to allow usage as replacement.")
         pai_node.type = dc_type
     else:
         assert (dc_type == pai_node.type)
@@ -395,13 +395,18 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 return DataClassAction, None
 
         self._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
-        action, nargs = make_action()
-
-        self.add_argument('--' + flag,
-                          action=action,
-                          type=str,
-                          nargs=nargs,
-                          )
+        if arg_field.meta.get('fix_dc', False):
+            # if the dataclass is fixed, just add it right away
+            if arg_field.list or arg_field.dict_type:
+                raise ValueError("Only a standard field can be fixed")
+            add_dataclass_field(self, pai_node, prefix, root, default_dict_key_value(default), arg_field=arg_field)
+        else:
+            action, nargs = make_action()
+            self.add_argument('--' + flag,
+                              action=action,
+                              type=str,
+                              nargs=nargs,
+                              )
 
     def parse_known_args(self, args=None, namespace=None):
         args = sys.argv[1:] if args is None else list(args)
