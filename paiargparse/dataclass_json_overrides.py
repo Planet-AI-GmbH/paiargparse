@@ -125,8 +125,9 @@ def _asdict(obj, encode_json=False):
                                                    usage="to")
 
         # >>> INSERTED HERE
-        result = dict(result)
-        result['__cls__'] = obj.__class__.__module__ + ':' + obj.__class__.__name__
+        if hasattr(obj.__class__, '__pai_dataclass__'):
+            result = dict(result)
+            result['__cls__'] = obj.__class__.__module__ + ':' + obj.__class__.__name__
         # <<< END
         return _encode_overrides(dict(result), _user_overrides_or_exts(obj),
                                  encode_json=encode_json)

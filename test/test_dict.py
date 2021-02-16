@@ -30,6 +30,7 @@ class DC:
     int_str: Dict[int, str] = field(default_factory=dict)
 
     str_dc: Dict[str, Sub] = field(default_factory=dict)
+    str_dc_default: Dict[str, Sub] = field(default_factory=lambda: {'a': Sub(), 'b': Sub2()})
 
 
 class TestDict(unittest.TestCase):
@@ -71,6 +72,22 @@ class TestDict(unittest.TestCase):
         self.assertEqual(dc.str_dc['a'].p, 1)
         self.assertEqual(dc.str_dc['b'].x, 'test')
         self.assertEqual(dc.str_dc['a'].sub_sub.int_arg, 10)
+
+    def test_str_dataclass_dict_default_field(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('dc', DC)
+        dc: DC = parser.parse_args([
+            '--dc.str_dc_default.a.p', '1',
+            '--dc.str_dc_default.b.x', 'test',
+            '--dc.str_dc_default.a.sub_sub.int_arg', '10',
+        ]).dc
+
+        self.assertListEqual(['a', 'b'], list(dc.str_dc_default.keys()))
+        self.assertIsInstance(dc.str_dc_default['a'], Sub)
+        self.assertIsInstance(dc.str_dc_default['b'], Sub2)
+        self.assertEqual(dc.str_dc_default['a'].p, 1)
+        self.assertEqual(dc.str_dc_default['b'].x, 'test')
+        self.assertEqual(dc.str_dc_default['a'].sub_sub.int_arg, 10)
 
     def test_str_dataclass_dict_default(self):
         parser = PAIArgumentParser()

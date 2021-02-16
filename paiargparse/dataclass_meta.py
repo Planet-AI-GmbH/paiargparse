@@ -66,6 +66,7 @@ def pai_dataclass(_cls=None, alt=None, no_assign_to_unknown=True):
     """
 
     def wrap(cls):
+        setattr(cls, '__pai_dataclass__', None)  # Mark this class as a pai dataclass
         setattr(cls, '__alt_name__', alt)
         cls = _process_class(cls)
         if no_assign_to_unknown:

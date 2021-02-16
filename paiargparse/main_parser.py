@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from typing import Any
+from typing import Any, List
 
 from paiargparse.dataclass_parser import PAIDataClassArgumentParser
 
@@ -19,8 +19,8 @@ class PAIArgumentParser(ArgumentParser):
         self._data_class_parser = PAIDataClassArgumentParser(add_help=add_help, formatter_class=formatter_class,
                                                              ignore_required=ignore_required)
 
-    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = None):
-        self._data_class_parser.add_root_argument(param_name, dc_type, default)
+    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = None, ignore: List[str] = None):
+        self._data_class_parser.add_root_argument(param_name, dc_type, default, ignore=ignore)
 
     def parse_known_args(self, args=None, namespace=None):
         # parse args that match the default arg parser

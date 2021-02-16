@@ -2,7 +2,7 @@ import importlib
 import sys
 from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
 from dataclasses import MISSING
-from typing import Any, Dict, NamedTuple, Optional
+from typing import Any, Dict, NamedTuple, Optional, List
 
 from paiargparse.dataclass_extractor import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices, \
     str_to_bool
@@ -26,7 +26,7 @@ def default_dict_key_value(arg: 'DefaultArg'):
     return arg.arg_name
 
 
-def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentField):
+def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: ArgumentField, ignore: List[str]):
     if field.dict_type and field.dataclass:
         # if the value type is again a dataclass, handle this differently
         # The values of the key/value pairs are the type of the dataclass
@@ -85,7 +85,7 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                                                    value=None,
                                                    )
                     add_dataclass_field(parser, root_dcs[k], f"{arg.arg_name}{sep}",
-                                        root_dcs[k].dcs, None, dc_type)
+                                        root_dcs[k].dcs, values=None, dc_type=dc_type, ignore=ignore)
 
         return DictParserDataclassAction
     elif field.dict_type:
@@ -129,6 +129,7 @@ def add_dataclass_field(
         prefix: str,
         parent_pcs: dict,
         values: Any,
+        ignore: List[str],
         dc_type=None,
         arg_field: Optional[ArgumentField] = None,
 ):
@@ -199,20 +200,23 @@ def add_dataclass_field(
             raise ValueError(f"unsupported mode {mode}.")
 
         if not arg.dict_type and arg.dataclass:
-            default = getattr(pai_node.default, arg.name) if hasattr(pai_node.default, arg.name) else arg.default
             root_dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                   arg_name=full_arg_name,
                                                   type=arg.list if arg.list else arg.type,
-                                                  default=default,
+                                                  default=getattr(pai_node.default, arg.name, arg.default),
                                                   value=None,
                                                   )
             parser.add_dc_argument(root_dcs[arg.name].dcs,
                                    full_arg_name,
                                    parent=parent_pcs,
                                    arg_field=arg,
+                                   ignore=ignore,
                                    )
         else:
             full_arg_name += arg.name
+            if any(full_arg_name.startswith(ignore_prefixes) for ignore_prefixes in ignore):
+                continue
+
             root_params[arg.name] = PAINode(name=arg.name, arg_name=full_arg_name, value=MISSING)
             choices = enum_choices(arg.enum) if arg.enum else None
             if arg.meta.get('enforce_choices', True) and arg.meta.get('choices', None) is not None:
@@ -223,13 +227,13 @@ def add_dataclass_field(
                                 help=arg.meta.get('help', "Missing help string"),
                                 type=arg_type,
                                 choices=choices,
-                                action=generate_field_action(pai_node, root_params[arg.name], arg),
+                                action=generate_field_action(pai_node, root_params[arg.name], arg, ignore=ignore),
                                 nargs=arg.meta.get('nargs', '*') if arg.list or arg.dict_type else None)
 
             if arg.dict_type and arg.dataclass:
                 default = DefaultArg(
                     dict,
-                    getattr(pai_node.default, arg.name, None),
+                    getattr(pai_node.default, arg.name, arg.default),
                     full_arg_name,
                 )
                 parser._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
@@ -305,7 +309,10 @@ class PAIDataClassArgumentParser(ArgumentParser):
 
         return dc
 
-    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = None):
+    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = None, ignore: List[str]=None):
+        if ignore is None:
+            ignore = []
+
         if not isinstance(dc_type, type):
             raise TypeError(
                 "Not passing a type to dc_type. If you want to pass default values, use the default argument.")
@@ -331,6 +338,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 enum=None,
                 dict_type=None,
             ),
+            ignore=ignore,
         )
 
     def add_dc_argument(self,
@@ -338,6 +346,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
                         prefix: str,
                         parent: Dict[str, PAINodeDataClass],
                         arg_field: ArgumentField,
+                        ignore: List[str],
                         ):
         param_name = arg_field.name
         dc_type = arg_field.type
@@ -372,13 +381,16 @@ class PAIDataClassArgumentParser(ArgumentParser):
                                                         default=default,
                                                         value=None,
                                                         )
-                    add_dataclass_field(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", root_dcs[str(i)].dcs, None, dc_type)
+                    add_dataclass_field(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", root_dcs[str(i)].dcs,
+                                        values=None, dc_type=dc_type, ignore=ignore)
 
         class DataClassAction(Action):
             def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
-                add_dataclass_field(parser, pai_node, prefix, root, values, arg_field=arg_field)
+                add_dataclass_field(parser, pai_node, prefix, root, values, arg_field=arg_field, ignore=ignore)
 
         flag = f'{prefix}{param_name}'
+        if any(flag.startswith(ignore_prefixes) for ignore_prefixes in ignore):
+            return
 
         default = DefaultArg(
             dc_type,
@@ -399,7 +411,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
             # if the dataclass is fixed, just add it right away
             if arg_field.list or arg_field.dict_type:
                 raise ValueError("Only a standard field can be fixed")
-            add_dataclass_field(self, pai_node, prefix, root, default_dict_key_value(default), arg_field=arg_field)
+            add_dataclass_field(self, pai_node, prefix, root, default_dict_key_value(default), arg_field=arg_field, ignore=ignore)
         else:
             action, nargs = make_action()
             self.add_argument('--' + flag,
