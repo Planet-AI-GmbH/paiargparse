@@ -2,7 +2,7 @@ import importlib
 import sys
 from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
 from dataclasses import MISSING
-from typing import Any, Dict, NamedTuple, Optional, TypeVar
+from typing import Any, Dict, NamedTuple, Optional
 
 from paiargparse.dataclass_extractor import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices, \
     str_to_bool
