@@ -1,7 +1,7 @@
 import importlib
 import sys
 from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
-from dataclasses import MISSING
+from dataclasses import MISSING, is_dataclass
 from typing import Any, Dict, NamedTuple, Optional, List
 
 from paiargparse.dataclass_extractor import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices, \
@@ -174,11 +174,16 @@ def add_dataclass_field(
                     raise ValueError(f"Invalid module and class name {values}. Must be 'path.to.module:class_name'")
                 dc_type = getattr(importlib.import_module(module), class_name)
 
+        if not is_dataclass(dc_type):
+            raise TypeError(f"The type of the default value ({dc_type}) is not a dataclass. "
+                            f"Maybe you passed the class instead of an instance, i.e., Params instead of Params().")
         if not meta.get('disable_subclass_check', False) and not issubclass(dc_type, pai_node.type):
             raise TypeError(f"Data class {dc_type} must inherit {pai_node.type} to allow usage as replacement.")
         pai_node.type = dc_type
     else:
         assert (dc_type == pai_node.type)
+
+
 
     if meta.get('enforce_choices', False) and data_class_choices is not None:
         if dc_type.__name__ not in data_class_choices:
