@@ -2,7 +2,7 @@ import importlib
 import sys
 from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
 from dataclasses import MISSING, is_dataclass
-from typing import Any, Dict, NamedTuple, Optional, List
+from typing import Any, Dict, NamedTuple, Optional, List, Union
 
 from paiargparse.dataclass_extractor import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices, \
     str_to_bool
@@ -16,6 +16,12 @@ class RequiredArgumentError(Exception):
 
 class InvalidChoiceError(Exception):
     pass
+
+
+def is_none(v: Union[List[str], str]) -> bool:
+    if isinstance(v, list):
+        v = v[0]
+    return v.lower() in {'none', 'null'}
 
 
 def type_to_str(t, separator=':'):
@@ -67,9 +73,9 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                 # However, to not register as dataclass to the arguments (since it already exists = self)
                 pai_node.dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                           arg_name=f"{arg.arg_name}{sep}",
-                                                          type=dict,
-                                                          default=None,
-                                                          value=None,
+                                                          parsed_type=dict,
+                                                          default_value=MISSING,
+                                                          value=MISSING,
                                                           )
                 root_dcs = pai_node.dcs[arg.name].dcs
 
@@ -80,8 +86,8 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                     dc_type = v
                     root_dcs[k] = PAINodeDataClass(name=k,
                                                    arg_name=f"{arg.arg_name}{sep}",
-                                                   type=dc_type,
-                                                   default=defaults[k],
+                                                   parsed_type=dc_type,
+                                                   default_value=defaults[k],
                                                    value=None,
                                                    )
                     add_dataclass_field(parser, root_dcs[k], f"{arg.arg_name}{sep}",
@@ -103,6 +109,13 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
     else:
         class FieldSetterAction(Action):
             def __call__(self, parser, args, values, option_string=None):
+                if field.optional:
+                    if is_none(values):
+                        arg.value = None
+                        return
+
+                is_str_type = field.enum or field.dict_type or field.type == bool or field.type == str
+
                 if field.type == bool:
                     if isinstance(values, list):
                         values = list(map(str_to_bool, values))
@@ -113,11 +126,15 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                     if field.enum:
                         arg.value = field.list([str_to_enum(v, field.enum, field.type) for v in values])
                     else:
+                        if not is_str_type:
+                            values = map(field.type, values)
                         arg.value = field.list(values)
                 else:
                     if field.enum:
                         arg.value = str_to_enum(values, field.enum, field.type)
                     else:
+                        if not is_str_type:
+                            values = field.type(values)
                         arg.value = values
 
         return FieldSetterAction
@@ -137,24 +154,34 @@ def add_dataclass_field(
     Add a new sub group to the parser based on the values of a data class
     """
     assert (isinstance(pai_node, PAINodeDataClass))
+    if arg_field and arg_field.optional and is_none(values):
+        pai_node.parsed_type = None
+        pai_node.value = None
+        return
     param_name = pai_node.name
     meta = arg_field.meta if arg_field and arg_field.meta else {}
     data_class_choices = None
     if meta.get('choices', None) is not None:
-        data_class_choices = list(filter(lambda x: x, sum([[cls.__name__, cls.__alt_name__] for cls in arg_field.meta['choices']], [])))
+        data_class_choices = list(
+            filter(lambda x: x, sum([[cls.__name__, cls.__alt_name__] for cls in arg_field.meta['choices']], [])))
 
     # Add new args for this argument
     if dc_type is None:
         if values in parser._default_data_classes_to_set_after_next_run:
             v = parser._default_data_classes_to_set_after_next_run[values]
+            del parser._default_data_classes_to_set_after_next_run[values]
             if v.value == MISSING:
-                raise RequiredArgumentError(f'The following argument is required: {v.arg_name}')
+                if v.override_missing:
+                    dc_type = v.parsed_type  # Type is given
+                else:
+                    raise RequiredArgumentError(f'The following argument is required: {v.arg_name}')
             elif v.value is not None:
                 dc_type = v.value.__class__
             else:
-                dc_type = v.dc_type
-
-            del parser._default_data_classes_to_set_after_next_run[values]
+                if not arg_field.optional:
+                    raise ValueError("Only optional fields can be None")
+                else:
+                    return  # Optional field, with default None
         else:
             choices = {}
             if arg_field is not None and meta.get('choices', None) is not None:
@@ -177,13 +204,13 @@ def add_dataclass_field(
         if not is_dataclass(dc_type):
             raise TypeError(f"The type of the default value ({dc_type}) is not a dataclass. "
                             f"Maybe you passed the class instead of an instance, i.e., Params instead of Params().")
-        if not meta.get('disable_subclass_check', False) and not issubclass(dc_type, pai_node.type):
-            raise TypeError(f"Data class {dc_type} must inherit {pai_node.type} to allow usage as replacement.")
-        pai_node.type = dc_type
+        if not meta.get('disable_subclass_check', False) and not issubclass(dc_type, pai_node.parsed_type):
+            raise TypeError(f"Data class {dc_type} must inherit {pai_node.parsed_type} to allow usage as replacement.")
+        pai_node.parsed_type = dc_type
     else:
-        assert (dc_type == pai_node.type)
+        assert (dc_type == pai_node.parsed_type)
 
-
+    pai_node.value = pai_node.parsed_type.__module__ + ":" + dc_type.__name__
 
     if meta.get('enforce_choices', False) and data_class_choices is not None:
         if dc_type.__name__ not in data_class_choices:
@@ -207,9 +234,9 @@ def add_dataclass_field(
         if not arg.dict_type and arg.dataclass:
             root_dcs[arg.name] = PAINodeDataClass(name=arg.name,
                                                   arg_name=full_arg_name,
-                                                  type=arg.list if arg.list else arg.type,
-                                                  default=getattr(pai_node.default, arg.name, arg.default),
-                                                  value=None,
+                                                  parsed_type=arg.list if arg.list else arg.type,
+                                                  default_value=getattr(pai_node.default_value, arg.name, arg.default),
+                                                  value=MISSING,
                                                   )
             parser.add_dc_argument(root_dcs[arg.name].dcs,
                                    full_arg_name,
@@ -226,11 +253,12 @@ def add_dataclass_field(
             choices = enum_choices(arg.enum) if arg.enum else None
             if arg.meta.get('enforce_choices', True) and arg.meta.get('choices', None) is not None:
                 choices = arg.meta.get('choices')
-            arg_type = str if arg.enum or arg.dict_type or arg.type == bool else arg.type
+            if choices is not None:
+                choices = list(map(str, choices))  # always string
             parser.add_argument(f"--{full_arg_name}",
                                 default=None if isinstance(arg.default, MISSING.__class__) else arg.default,
                                 help=arg.meta.get('help', "Missing help string"),
-                                type=arg_type,
+                                type=str,  # always str, parse type in actual handler
                                 choices=choices,
                                 action=generate_field_action(pai_node, root_params[arg.name], arg, ignore=ignore),
                                 nargs=arg.meta.get('nargs', '*') if arg.list or arg.dict_type else None)
@@ -238,16 +266,17 @@ def add_dataclass_field(
             if arg.dict_type and arg.dataclass:
                 default = DefaultArg(
                     dict,
-                    getattr(pai_node.default, arg.name, arg.default),
+                    getattr(pai_node.default_value, arg.name, arg.default),
                     full_arg_name,
                 )
                 parser._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
 
 
 class DefaultArg(NamedTuple):
-    dc_type: Any
-    value: Any
+    parsed_type: Any  # MISSING if not set, else the parsed type (or None)
+    value: Any  # MISSING if not set, None and any other value is legitimate
     arg_name: str
+    override_missing: bool = False
 
 
 class PAIDataClassArgumentParser(ArgumentParser):
@@ -265,7 +294,8 @@ class PAIDataClassArgumentParser(ArgumentParser):
 
         self._add_help = add_help
         self._default_data_classes_to_set_after_next_run: Dict[str, DefaultArg] = {}
-        self._params_tree = PAINodeDataClass(type=None, name='', arg_name='', value=None)  # Root
+        self._params_tree = PAINodeDataClass(parsed_type=None, default_value=MISSING, name='', arg_name='',
+                                             value=None)  # Root
         self.ignore_required = ignore_required
 
     def _tree_to_data_class(self, node: PAINodeDataClass):
@@ -274,27 +304,33 @@ class PAIDataClassArgumentParser(ArgumentParser):
 
         # construct actual dataclass
         param_values = node.all_param_values()
-        if node.default and issubclass(node.type, node.default.__class__):
-            # set defaults, but only if we are sure that the types are compatible
-            if node.type not in {set, list, tuple}:
-                for arg in extract_args_of_dataclass(node.default.__class__, exclude_ignored=False):
-                    name = arg.name
-                    if name in param_values:
-                        # already set from cmd
-                        continue
-                    if name not in node.type.__dataclass_fields__:
-                        # target data class does not have this field
-                        continue
-                    param_values[name] = getattr(node.default, name)
+        if node.value is None or (node.value == MISSING and node.default_value is None):
+            # User set to None and None by default
+            return None
+        elif node.default_value is not None and node.default_value != MISSING:
+            if node.parsed_type is None:
+                node.parsed_type = node.default_value.__class__
+            if issubclass(node.parsed_type, node.default_value.__class__):
+                # set defaults, but only if we are sure that the types are compatible
+                if node.parsed_type not in {set, list, tuple}:
+                    for arg in extract_args_of_dataclass(node.default_value.__class__, exclude_ignored=False):
+                        name = arg.name
+                        if name in param_values:
+                            # already set from cmd
+                            continue
+                        if name not in node.parsed_type.__dataclass_fields__:
+                            # target data class does not have this field
+                            continue
+                        param_values[name] = getattr(node.default_value, name)
 
-        if node.type in {set, list, tuple}:
-            dc = node.type([v for k, v in param_values.items()])
-        elif node.type == dict:
+        if node.parsed_type in {set, list, tuple}:
+            dc = node.parsed_type([v for k, v in param_values.items()])
+        elif node.parsed_type == dict:
             return param_values
         else:
             # Check for missing required fields (these MUST ALWAYS be set, cause they have no default value in init)
             missing_required = [f"--{node.params[field.name].arg_name}" for field in
-                                extract_args_of_dataclass(node.type) if
+                                extract_args_of_dataclass(node.parsed_type) if
                                 field.name not in param_values and field.required]
             if len(missing_required) > 0:
                 raise RequiredArgumentError(
@@ -303,18 +339,18 @@ class PAIDataClassArgumentParser(ArgumentParser):
             # However, this check can be disabled if the 'ignore_required' flag of the parser is set
             if not self.ignore_required:
                 missing_meta_required = [f"--{node.params[field.name].arg_name}" for field in
-                                         extract_args_of_dataclass(node.type) if
+                                         extract_args_of_dataclass(node.parsed_type) if
                                          field.name not in param_values and field.meta and field.meta.get('required')]
                 if len(missing_meta_required) > 0:
                     raise RequiredArgumentError(
                         'The following arguments are required: {}'.format(', '.join(missing_meta_required)))
 
             # Instantiate the real class
-            dc = node.type(**param_values)
+            dc = node.parsed_type(**param_values)
 
         return dc
 
-    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = None, ignore: List[str]=None):
+    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = MISSING, ignore: List[str] = None):
         if ignore is None:
             ignore = []
 
@@ -323,8 +359,8 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 "Not passing a type to dc_type. If you want to pass default values, use the default argument.")
         self._params_tree.dcs[param_name] = PAINodeDataClass(name=param_name,
                                                              arg_name=param_name,
-                                                             type=dc_type,
-                                                             default=default,
+                                                             parsed_type=dc_type,
+                                                             default_value=default,
                                                              value=None,
                                                              )
         self.add_dc_argument(
@@ -336,7 +372,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 dc_type,
                 {},
                 False,
-                False,
+                [],
                 True,
                 default,
                 required=False,
@@ -344,6 +380,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 dict_type=None,
             ),
             ignore=ignore,
+            override_missing=True,
         )
 
     def add_dc_argument(self,
@@ -352,6 +389,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
                         parent: Dict[str, PAINodeDataClass],
                         arg_field: ArgumentField,
                         ignore: List[str],
+                        override_missing=False,
                         ):
         param_name = arg_field.name
         dc_type = arg_field.type
@@ -382,8 +420,8 @@ class PAIDataClassArgumentParser(ArgumentParser):
                     root_dcs = pai_node.dcs
                     root_dcs[str(i)] = PAINodeDataClass(name=str(i),
                                                         arg_name=f"{prefix}{param_name}{sep}",
-                                                        type=dc_type,
-                                                        default=default,
+                                                        parsed_type=dc_type,
+                                                        default_value=default,
                                                         value=None,
                                                         )
                     add_dataclass_field(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", root_dcs[str(i)].dcs,
@@ -398,9 +436,10 @@ class PAIDataClassArgumentParser(ArgumentParser):
             return
 
         default = DefaultArg(
-            dc_type,
-            pai_node.default,
+            pai_node.parsed_type,
+            pai_node.default_value,
             flag,
+            override_missing=override_missing,
         )
 
         def make_action():
@@ -412,11 +451,13 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 return DataClassAction, None
 
         self._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
+
         if arg_field.meta.get('fix_dc', False):
             # if the dataclass is fixed, just add it right away
             if arg_field.list or arg_field.dict_type:
                 raise ValueError("Only a standard field can be fixed")
-            add_dataclass_field(self, pai_node, prefix, root, default_dict_key_value(default), arg_field=arg_field, ignore=ignore)
+            add_dataclass_field(self, pai_node, prefix, root, default_dict_key_value(default), arg_field=arg_field,
+                                ignore=ignore)
         else:
             action, nargs = make_action()
             self.add_argument('--' + flag,

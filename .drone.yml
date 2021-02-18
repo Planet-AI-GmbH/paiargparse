@@ -47,7 +47,8 @@ steps:
     test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict test.test_generic_data_class.TestGenericDataClass.test_genertic
     test.test_ignore.TestIgnore.test_dict test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
     test.test_meta.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc
-    test.test_multi_args.TestPAIParser.test_three_dc_required test.test_ssnake.TestSSnake.test_ssnake
+    test.test_multi_args.TestPAIParser.test_three_dc_required test.test_optional.TestOptional.test_optionals
+    test.test_optional.TestOptional.test_optionals_args test.test_ssnake.TestSSnake.test_ssnake
     test.test_subparser.TestSubParser.test_sub_parser test.test_subparser.TestSubParser.test_sub_parser_args
     test.test_subparser.TestSubParser.test_sub_parser_flat test.test_types.TestPAIParser.test_enum
     test.test_types.TestPAIParser.test_enum_list test.test_types.TestPAIParser.test_list
@@ -633,6 +634,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_optional.TestOptional.test_optionals
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_optional.TestOptional.test_optionals
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_optional.TestOptional.test_optionals_args
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_optional.TestOptional.test_optionals_args
   when:
     status:
     - failure
@@ -876,7 +907,8 @@ steps:
     test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict test.test_generic_data_class.TestGenericDataClass.test_genertic
     test.test_ignore.TestIgnore.test_dict test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
     test.test_meta.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc
-    test.test_multi_args.TestPAIParser.test_three_dc_required test.test_ssnake.TestSSnake.test_ssnake
+    test.test_multi_args.TestPAIParser.test_three_dc_required test.test_optional.TestOptional.test_optionals
+    test.test_optional.TestOptional.test_optionals_args test.test_ssnake.TestSSnake.test_ssnake
     test.test_subparser.TestSubParser.test_sub_parser test.test_subparser.TestSubParser.test_sub_parser_args
     test.test_subparser.TestSubParser.test_sub_parser_flat test.test_types.TestPAIParser.test_enum
     test.test_types.TestPAIParser.test_enum_list test.test_types.TestPAIParser.test_list
@@ -1462,6 +1494,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_optional.TestOptional.test_optionals
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_optional.TestOptional.test_optionals
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_optional.TestOptional.test_optionals_args
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_optional.TestOptional.test_optionals_args
   when:
     status:
     - failure
@@ -1699,7 +1761,8 @@ steps:
     test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict test.test_generic_data_class.TestGenericDataClass.test_genertic
     test.test_ignore.TestIgnore.test_dict test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
     test.test_meta.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc
-    test.test_multi_args.TestPAIParser.test_three_dc_required test.test_ssnake.TestSSnake.test_ssnake
+    test.test_multi_args.TestPAIParser.test_three_dc_required test.test_optional.TestOptional.test_optionals
+    test.test_optional.TestOptional.test_optionals_args test.test_ssnake.TestSSnake.test_ssnake
     test.test_subparser.TestSubParser.test_sub_parser test.test_subparser.TestSubParser.test_sub_parser_args
     test.test_subparser.TestSubParser.test_sub_parser_flat test.test_types.TestPAIParser.test_enum
     test.test_types.TestPAIParser.test_enum_list test.test_types.TestPAIParser.test_list
@@ -2285,6 +2348,36 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_multi_args.TestPAIParser.test_three_dc_required
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_optional.TestOptional.test_optionals
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_optional.TestOptional.test_optionals
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_optional.TestOptional.test_optionals_args
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_optional.TestOptional.test_optionals_args
   when:
     status:
     - failure
@@ -2526,7 +2619,8 @@ steps:
     test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict test.test_generic_data_class.TestGenericDataClass.test_genertic
     test.test_ignore.TestIgnore.test_dict test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
     test.test_meta.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc
-    test.test_multi_args.TestPAIParser.test_three_dc_required test.test_ssnake.TestSSnake.test_ssnake
+    test.test_multi_args.TestPAIParser.test_three_dc_required test.test_optional.TestOptional.test_optionals
+    test.test_optional.TestOptional.test_optionals_args test.test_ssnake.TestSSnake.test_ssnake
     test.test_subparser.TestSubParser.test_sub_parser test.test_subparser.TestSubParser.test_sub_parser_args
     test.test_subparser.TestSubParser.test_sub_parser_flat test.test_types.TestPAIParser.test_enum
     test.test_types.TestPAIParser.test_enum_list test.test_types.TestPAIParser.test_list

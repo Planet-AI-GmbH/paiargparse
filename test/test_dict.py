@@ -65,6 +65,7 @@ class TestDict(unittest.TestCase):
             '--dc.str_dc.a.sub_sub.int_arg', '10',
         ]).dc
 
+        self.assertIsInstance(dc.str_dc, dict)
         self.assertListEqual(['a', 'b', 'c'], list(dc.str_dc.keys()))
         self.assertIsInstance(dc.str_dc['a'], Sub)
         self.assertIsInstance(dc.str_dc['b'], Sub2)

@@ -49,7 +49,7 @@ class TestPAIParser(unittest.TestCase):
         parser = PAIArgumentParser()
         parser.add_root_argument('arg', Level1Required)
         with self.assertRaises(RequiredArgumentError):
-            parser.parse_args()
+            parser.parse_args(args=[])
 
     def test_required_via_meta(self):
         parser = PAIArgumentParser()

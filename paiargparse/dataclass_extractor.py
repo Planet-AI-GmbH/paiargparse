@@ -1,4 +1,4 @@
-from dataclasses import dataclass, _MISSING_TYPE
+from dataclasses import dataclass, MISSING
 from enum import Enum
 from typing import Any, List, Type, Optional, Tuple, Union, TypeVar
 
@@ -15,8 +15,8 @@ class ArgumentField:
     dataclass: bool
     default: Any
     required: bool
-    enum: Optional[Type[Enum]]   # If set its an enum, this is the type
-    dict_type: Any     # If set its a dict, this is the VALUE type, type is the key type
+    enum: Optional[Type[Enum]]  # If set its an enum, this is the type
+    dict_type: Any  # If set its a dict, this is the VALUE type, type is the key type
 
     def __post_init__(self):
         # check if it is a supported type
@@ -26,7 +26,8 @@ class ArgumentField:
         if self.dict_type and self.dataclass:
             supported_types = {str}
             if self.type not in supported_types:
-                raise TypeError(f"If using a Dict[type, DataClass], type must be in {supported_types}, but got {self.type}")
+                raise TypeError(
+                    f"If using a Dict[type, DataClass], type must be in {supported_types}, but got {self.type}")
 
 
 def split_optional_type(t):
@@ -114,7 +115,7 @@ def arg_from_field(name, meta, field) -> ArgumentField:
         is_dataclass = hasattr(t, '__dataclass_fields__')
 
     default = field.default
-    if isinstance(default, _MISSING_TYPE) and not isinstance(field.default_factory, _MISSING_TYPE):
+    if default == MISSING and field.default_factory != MISSING:
         default = field.default_factory()
 
     required = is_field_required(field)
@@ -125,7 +126,7 @@ def arg_from_field(name, meta, field) -> ArgumentField:
 
 
 def is_field_required(field):
-    return isinstance(field.default, _MISSING_TYPE) and isinstance(field.default_factory, _MISSING_TYPE)
+    return field.default == MISSING and field.default_factory == MISSING
 
 
 def extract_args_of_dataclass(dc, exclude_ignored=True) -> List[ArgumentField]:
