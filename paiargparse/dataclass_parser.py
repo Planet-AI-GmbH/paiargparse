@@ -17,7 +17,6 @@ class RequiredArgumentError(Exception):
 class InvalidChoiceError(Exception):
     pass
 
-
 def is_none(v: Union[List[str], str]) -> bool:
     if isinstance(v, list):
         v = v[0]
@@ -163,7 +162,7 @@ def add_dataclass_field(
     data_class_choices = None
     if meta.get('choices', None) is not None:
         data_class_choices = list(
-            filter(lambda x: x, sum([[cls.__name__, cls.__alt_name__] for cls in arg_field.meta['choices']], [])))
+            filter(lambda x: x, sum([parser.alt_names_of_choice(cls) for cls in arg_field.meta['choices']], [])))
 
     # Add new args for this argument
     if dc_type is None:
@@ -186,9 +185,8 @@ def add_dataclass_field(
             choices = {}
             if arg_field is not None and meta.get('choices', None) is not None:
                 for choice in meta['choices']:
-                    choices[choice.__name__] = choice
-                    if hasattr(choice, '__alt_name__') and choice.__alt_name__:
-                        choices[choice.__alt_name__] = choice
+                    for name in parser.alt_names_of_choice(choice):
+                        choices[name] = choice
             if values in choices:
                 dc_type = choices[values]
             else:
@@ -508,3 +506,11 @@ class PAIDataClassArgumentParser(ArgumentParser):
     def parse_args(self, args=None, namespace=None):
         args = super(PAIDataClassArgumentParser, self).parse_args(args, namespace)
         return args
+
+    def alt_names_of_choice(self, choice) -> List[str]:
+        names = [choice.__name__]
+        if hasattr(choice, '__alt_name__') and choice.__alt_name__:
+            names.append(choice.__alt_name__)
+
+        return names
+

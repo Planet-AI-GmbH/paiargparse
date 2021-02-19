@@ -2,8 +2,8 @@ import unittest
 
 from paiargparse import PAIArgumentParser, RequiredArgumentError
 from paiargparse.dataclass_parser import InvalidChoiceError
-from test.dataclasse_setup import Level1b, Level2, Level1, Level2a, Level3a, Level3base, TestWithRequiredMeta, \
-    Level1Required
+from test.dataclasse_setup import Level1b, Level2, Level1, Level2a, Level3a, TestWithRequiredMeta, \
+    Level1Required, Level3aa, Level3base
 
 
 class TestPAIParser(unittest.TestCase):
@@ -38,6 +38,7 @@ class TestPAIParser(unittest.TestCase):
         parser.add_root_argument('arg', Level1)
         args = parser.parse_args(args=['--arg.p1', '0',
                                        '--arg.l.lvl3', 'AlternativeLevel3'])
+        self.assertIsInstance(args.arg.l.lvl3, Level3aa)
 
     def test_required(self):
         parser = PAIArgumentParser()
@@ -76,7 +77,8 @@ class TestPAIParser(unittest.TestCase):
     def test_two_dc_change(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('arg', Level1)
-        args = parser.parse_args(args=['--arg.l.p1', '-13', '--arg.l', 'test.test_data_class:Level2a', '--arg.l.p1a', '0.5'])
+        args = parser.parse_args(
+            args=['--arg.l.p1', '-13', '--arg.l', 'test.test_data_class:Level2a', '--arg.l.p1a', '0.5'])
         dc = args.arg
 
         self.assertIsInstance(dc, Level1)
