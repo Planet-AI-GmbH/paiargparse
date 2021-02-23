@@ -203,7 +203,8 @@ def add_dataclass_field(
             raise TypeError(f"The type of the default value ({dc_type}) is not a dataclass. "
                             f"Maybe you passed the class instead of an instance, i.e., Params instead of Params().")
         if not meta.get('disable_subclass_check', False) and not issubclass(dc_type, pai_node.parsed_type):
-            raise TypeError(f"Data class {dc_type} must inherit {pai_node.parsed_type} to allow usage as replacement.")
+            raise TypeError(f"Data class {dc_type} must inherit {pai_node.parsed_type} to allow usage as replacement. "
+                            f"But parents are {dc_type.__mro__}")
         pai_node.parsed_type = dc_type
     else:
         assert (dc_type == pai_node.parsed_type)
