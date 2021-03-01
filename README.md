@@ -68,13 +68,14 @@ class MyArguments:
 
 if __name__ == "__main__":
     parser = PAIArgumentParser()
-    parser.add_root_argument("myArgs", MyArguments)
+    # If passing flat, the root arg name is not passed in the shell (see below)
+    parser.add_root_argument("myArgs", MyArguments, flat=True)
     args = parser.parse_args()
 ```
 
 Call with
 ```shell
-python my_program.py --myArgs.required_int_arg 1
+python my_program.py --required_int_arg 1
 ```
 
 #### Enumerations
