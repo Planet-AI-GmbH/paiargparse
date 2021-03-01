@@ -3,6 +3,7 @@ import sys
 from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
 from dataclasses import MISSING, is_dataclass
 from typing import Any, Dict, NamedTuple, Optional, List, Union
+import editdistance
 
 from paiargparse.dataclass_extractor import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices, \
     str_to_bool
@@ -16,6 +17,11 @@ class RequiredArgumentError(Exception):
 
 class InvalidChoiceError(Exception):
     pass
+
+
+class UnknownArgumentError(Exception):
+    pass
+
 
 def is_none(v: Union[List[str], str]) -> bool:
     if isinstance(v, list):
@@ -505,7 +511,13 @@ class PAIDataClassArgumentParser(ArgumentParser):
         return namespace, args
 
     def parse_args(self, args=None, namespace=None):
-        args = super(PAIDataClassArgumentParser, self).parse_args(args, namespace)
+        args, argv = self.parse_known_args(args, namespace)
+        if argv:
+            # unknown arguments, but search for nearest matches
+            for action in self._actions:
+                pass
+
+            raise UnknownArgumentError("Unknown Arguments.")
         return args
 
     def alt_names_of_choice(self, choice) -> List[str]:

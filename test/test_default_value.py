@@ -1,6 +1,7 @@
 import unittest
 
 from paiargparse import PAIArgumentParser, RequiredArgumentError
+from paiargparse.dataclass_parser import UnknownArgumentError
 from test.dataclasse_setup import Level1b, Level1, Level2a, Level2, Level1Base
 
 
@@ -24,7 +25,7 @@ class TestPAIParserDefault(unittest.TestCase):
     def test_setting_argument_after_override(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('arg', Level1Base, default=Level1b(p1=-1))
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(UnknownArgumentError):
             parser.parse_args(args=['--arg.l.p1', '-13'])
 
     def test_setting_second_level(self):

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 from paiargparse import pai_dataclass, PAIArgumentParser
+from paiargparse.dataclass_parser import UnknownArgumentError
 
 
 @pai_dataclass
@@ -24,17 +25,17 @@ class TestIgnore(unittest.TestCase):
     def test_primitive(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('root', Base, ignore=['root'])
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(UnknownArgumentError):
             parser.parse_args(['--root.i', '1']).root
 
         parser = PAIArgumentParser()
         parser.add_root_argument('root', Base, ignore=['root.'])
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(UnknownArgumentError):
             parser.parse_args(['--root.i', '1']).root
 
         parser = PAIArgumentParser()
         parser.add_root_argument('root', Base, ignore=['root.i'])
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(UnknownArgumentError):
             parser.parse_args(['--root.i', '1']).root
 
         parser = PAIArgumentParser()
@@ -44,7 +45,7 @@ class TestIgnore(unittest.TestCase):
 
         parser = PAIArgumentParser()
         parser.add_root_argument('root', Base, ignore=['root.c'])
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(UnknownArgumentError):
             parser.parse_args(['--root.c.s', 'asdf']).root
 
         parser = PAIArgumentParser()
@@ -55,7 +56,7 @@ class TestIgnore(unittest.TestCase):
     def test_dict(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('root', Base, ignore=['root.d.first'])
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(UnknownArgumentError):
             parser.parse_args(['--root.d.first.s', 'asdf']).root
 
         parser = PAIArgumentParser()
@@ -72,7 +73,7 @@ class TestIgnore(unittest.TestCase):
     def test_list(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('root', Base, ignore=['root.l.0'])
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(UnknownArgumentError):
             parser.parse_args(['--root.l.0.s', 'asdf']).root
 
         parser = PAIArgumentParser()
