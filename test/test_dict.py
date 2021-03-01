@@ -19,7 +19,7 @@ class Sub:
 
 @pai_dataclass
 @dataclass
-class Sub2:
+class Sub2(Sub):
     x: str = ''
 
 
@@ -73,6 +73,14 @@ class TestDict(unittest.TestCase):
         self.assertEqual(dc.str_dc['a'].p, 1)
         self.assertEqual(dc.str_dc['b'].x, 'test')
         self.assertEqual(dc.str_dc['a'].sub_sub.int_arg, 10)
+
+    def test_str_dataclass_dict_no_subclass(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('dc', DC)
+        with self.assertRaises(TypeError):
+            dc: DC = parser.parse_args([
+                '--dc.str_dc', 'a=test.test_dict:Sub', 'b=test.test_dict:SubSub', 'c',
+            ]).dc
 
     def test_str_dataclass_dict_default_field(self):
         parser = PAIArgumentParser()

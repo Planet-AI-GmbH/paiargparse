@@ -78,6 +78,16 @@ class TestDataClassList(unittest.TestCase):
             dc.l
         )
 
+    def test_data_class_list_no_subclass(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('root', DC)
+        with self.assertRaises(TypeError):
+            dc: DC = parser.parse_args(
+                [
+                    '--root.l', 'test.test_dataclass_list:SubSub',
+                ]
+            ).root
+
     def test_data_class_list_default(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('root', DC, DC(l=[Sub(int_arg=-1), Sub(int_arg=-2)]))

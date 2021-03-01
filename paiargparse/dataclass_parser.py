@@ -73,6 +73,11 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                         defaults[k] = None
                         dict_values[k] = v
 
+                        if not field.meta.get('disable_subclass_check', False) and not issubclass(v, field.dict_type):
+                            raise TypeError(
+                                f"Data class {v} must inherit {field.dict_type} to allow usage as "
+                                f"replacement. But parents are {v.__mro__}")
+
                 # Add new root args for this argument in the params tree,
                 # this is basically another 'dataclass' (key to value mapping)
                 # However, to not register as dataclass to the arguments (since it already exists = self)
@@ -404,6 +409,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
 
         class ListDataClassAction(Action):
             def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
+                meta = arg_field.meta
                 if len(values) == 1 and values[0] in parser._default_data_classes_to_set_after_next_run:
                     values = values[0]
                     defaults = parser._default_data_classes_to_set_after_next_run[values]
@@ -418,7 +424,12 @@ class PAIDataClassArgumentParser(ArgumentParser):
                     dc_types = []
                     for i, value in enumerate(values):
                         module, class_name = value.split(":")
-                        dc_types.append(getattr(importlib.import_module(module), class_name))
+                        sub_dc_type = getattr(importlib.import_module(module), class_name)
+                        if not meta.get('disable_subclass_check', False) and not issubclass(sub_dc_type, arg_field.type):
+                            raise TypeError(
+                                f"Data class {sub_dc_type} must inherit {arg_field.type} to allow usage as "
+                                f"replacement. But parents are {sub_dc_type.__mro__}")
+                        dc_types.append(sub_dc_type)
                     defaults = [None] * len(dc_types)
 
                 for i, (dc_type, default) in enumerate(zip(dc_types, defaults)):
