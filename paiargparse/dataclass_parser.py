@@ -481,9 +481,14 @@ class PAIDataClassArgumentParser(ArgumentParser):
         while len(args) > 0 or len(self._default_data_classes_to_set_after_next_run) > 0:
             for k, v in list(self._default_data_classes_to_set_after_next_run.items()):
                 v: DefaultArg = v
-                if f'--{k}' not in orig_args:
+                # Check if the parameter is set from the cmd line, then ignore it
+                # Not that a parameter might also be set by --dataclass=ClassName, so split at '=' and match the first
+                # arg.
+                if f'--{k}' not in [a.split('=')[0] for a in orig_args]:
+                    # Not found in args, set it to default by adding it as a arg
                     args += ['--' + k, default_dict_key_value(v)]
                 else:
+                    # Found in args, do not set
                     del self._default_data_classes_to_set_after_next_run[k]
             namespace, args = super(PAIDataClassArgumentParser, self).parse_known_args(args, namespace)
             if args == prev_args:
