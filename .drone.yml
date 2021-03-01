@@ -34,9 +34,11 @@ steps:
     test.test_data_class.TestPAIParser.test_invalid_selection test.test_data_class.TestPAIParser.test_required
     test.test_data_class.TestPAIParser.test_required_dataclass test.test_data_class.TestPAIParser.test_required_via_meta
     test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_data_class.TestPAIParser.test_two_dc_change_flat
+    test.test_data_class.TestPAIParser.test_two_dc_change_with_eq test.test_dataclass_json.TestPAIParser.test_two_dc_change
     test.test_dataclass_list.TestDataClassList.test_data_class_list test.test_dataclass_list.TestDataClassList.test_data_class_list_default
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
     test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default test.test_dataclass_list.TestDataClassList.test_primitive_list
     test.test_dataclass_list.TestDataClassList.test_primitive_list_default test.test_dataclass_set.TestDataClassList.test_primitive_set
     test.test_dataclass_set.TestDataClassList.test_primitive_set_default test.test_default_value.TestPAIParserDefault.test_required
@@ -44,8 +46,9 @@ steps:
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_dict.TestDict.test_primitive
     test.test_dict.TestDict.test_primitive_default test.test_dict.TestDict.test_str_dataclass_dict
     test.test_dict.TestDict.test_str_dataclass_dict_default test.test_dict.TestDict.test_str_dataclass_dict_default_field
-    test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict test.test_generic_data_class.TestGenericDataClass.test_genertic
-    test.test_ignore.TestIgnore.test_dict test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
+    test.test_dict.TestDict.test_str_dataclass_dict_no_subclass test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict
+    test.test_generic_data_class.TestGenericDataClass.test_genertic test.test_ignore.TestIgnore.test_dict
+    test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
     test.test_meta.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc_required test.test_optional.TestOptional.test_optionals
     test.test_optional.TestOptional.test_optionals_args test.test_ssnake.TestSSnake.test_ssnake
@@ -233,6 +236,36 @@ steps:
     status:
     - failure
     - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change_flat
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change_flat
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change_with_eq
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change_with_eq
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_dataclass_json.TestPAIParser.test_two_dc_change
   image: planet:python3
   volumes:
@@ -274,6 +307,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass
   when:
     status:
     - failure
@@ -514,6 +562,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dict.TestDict.test_str_dataclass_dict_default_field
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dict.TestDict.test_str_dataclass_dict_no_subclass
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dict.TestDict.test_str_dataclass_dict_no_subclass
   when:
     status:
     - failure
@@ -894,9 +957,11 @@ steps:
     test.test_data_class.TestPAIParser.test_invalid_selection test.test_data_class.TestPAIParser.test_required
     test.test_data_class.TestPAIParser.test_required_dataclass test.test_data_class.TestPAIParser.test_required_via_meta
     test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_data_class.TestPAIParser.test_two_dc_change_flat
+    test.test_data_class.TestPAIParser.test_two_dc_change_with_eq test.test_dataclass_json.TestPAIParser.test_two_dc_change
     test.test_dataclass_list.TestDataClassList.test_data_class_list test.test_dataclass_list.TestDataClassList.test_data_class_list_default
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
     test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default test.test_dataclass_list.TestDataClassList.test_primitive_list
     test.test_dataclass_list.TestDataClassList.test_primitive_list_default test.test_dataclass_set.TestDataClassList.test_primitive_set
     test.test_dataclass_set.TestDataClassList.test_primitive_set_default test.test_default_value.TestPAIParserDefault.test_required
@@ -904,8 +969,9 @@ steps:
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_dict.TestDict.test_primitive
     test.test_dict.TestDict.test_primitive_default test.test_dict.TestDict.test_str_dataclass_dict
     test.test_dict.TestDict.test_str_dataclass_dict_default test.test_dict.TestDict.test_str_dataclass_dict_default_field
-    test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict test.test_generic_data_class.TestGenericDataClass.test_genertic
-    test.test_ignore.TestIgnore.test_dict test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
+    test.test_dict.TestDict.test_str_dataclass_dict_no_subclass test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict
+    test.test_generic_data_class.TestGenericDataClass.test_genertic test.test_ignore.TestIgnore.test_dict
+    test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
     test.test_meta.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc_required test.test_optional.TestOptional.test_optionals
     test.test_optional.TestOptional.test_optionals_args test.test_ssnake.TestSSnake.test_ssnake
@@ -1093,6 +1159,36 @@ steps:
     status:
     - failure
     - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change_flat
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change_flat
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change_with_eq
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change_with_eq
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_dataclass_json.TestPAIParser.test_two_dc_change
   image: planet:python3
   volumes:
@@ -1134,6 +1230,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass
   when:
     status:
     - failure
@@ -1374,6 +1485,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dict.TestDict.test_str_dataclass_dict_default_field
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dict.TestDict.test_str_dataclass_dict_no_subclass
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dict.TestDict.test_str_dataclass_dict_no_subclass
   when:
     status:
     - failure
@@ -1748,9 +1874,11 @@ steps:
     test.test_data_class.TestPAIParser.test_invalid_selection test.test_data_class.TestPAIParser.test_required
     test.test_data_class.TestPAIParser.test_required_dataclass test.test_data_class.TestPAIParser.test_required_via_meta
     test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_data_class.TestPAIParser.test_two_dc_change_flat
+    test.test_data_class.TestPAIParser.test_two_dc_change_with_eq test.test_dataclass_json.TestPAIParser.test_two_dc_change
     test.test_dataclass_list.TestDataClassList.test_data_class_list test.test_dataclass_list.TestDataClassList.test_data_class_list_default
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
     test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default test.test_dataclass_list.TestDataClassList.test_primitive_list
     test.test_dataclass_list.TestDataClassList.test_primitive_list_default test.test_dataclass_set.TestDataClassList.test_primitive_set
     test.test_dataclass_set.TestDataClassList.test_primitive_set_default test.test_default_value.TestPAIParserDefault.test_required
@@ -1758,8 +1886,9 @@ steps:
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_dict.TestDict.test_primitive
     test.test_dict.TestDict.test_primitive_default test.test_dict.TestDict.test_str_dataclass_dict
     test.test_dict.TestDict.test_str_dataclass_dict_default test.test_dict.TestDict.test_str_dataclass_dict_default_field
-    test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict test.test_generic_data_class.TestGenericDataClass.test_genertic
-    test.test_ignore.TestIgnore.test_dict test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
+    test.test_dict.TestDict.test_str_dataclass_dict_no_subclass test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict
+    test.test_generic_data_class.TestGenericDataClass.test_genertic test.test_ignore.TestIgnore.test_dict
+    test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
     test.test_meta.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc_required test.test_optional.TestOptional.test_optionals
     test.test_optional.TestOptional.test_optionals_args test.test_ssnake.TestSSnake.test_ssnake
@@ -1947,6 +2076,36 @@ steps:
     status:
     - failure
     - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change_flat
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change_flat
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_data_class.TestPAIParser.test_two_dc_change_with_eq
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_data_class.TestPAIParser.test_two_dc_change_with_eq
+  when:
+    status:
+    - failure
+    - success
 - name: test.test_dataclass_json.TestPAIParser.test_two_dc_change
   image: planet:python3
   volumes:
@@ -1988,6 +2147,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_default
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass
   when:
     status:
     - failure
@@ -2228,6 +2402,21 @@ steps:
   - cd $DRONE_WORKSPACE_BASE
   - . /root/venv/bin/activate
   - /root/venv/bin/python -m unittest test.test_dict.TestDict.test_str_dataclass_dict_default_field
+  when:
+    status:
+    - failure
+    - success
+- name: test.test_dict.TestDict.test_str_dataclass_dict_no_subclass
+  image: planet:python3
+  volumes:
+  - name: pip_cache
+    path: /root/.cache/pip
+  - name: venv
+    path: /root/venv
+  commands:
+  - cd $DRONE_WORKSPACE_BASE
+  - . /root/venv/bin/activate
+  - /root/venv/bin/python -m unittest test.test_dict.TestDict.test_str_dataclass_dict_no_subclass
   when:
     status:
     - failure
@@ -2606,9 +2795,11 @@ steps:
     test.test_data_class.TestPAIParser.test_invalid_selection test.test_data_class.TestPAIParser.test_required
     test.test_data_class.TestPAIParser.test_required_dataclass test.test_data_class.TestPAIParser.test_required_via_meta
     test.test_data_class.TestPAIParser.test_single_dc test.test_data_class.TestPAIParser.test_two_dc
-    test.test_data_class.TestPAIParser.test_two_dc_change test.test_dataclass_json.TestPAIParser.test_two_dc_change
+    test.test_data_class.TestPAIParser.test_two_dc_change test.test_data_class.TestPAIParser.test_two_dc_change_flat
+    test.test_data_class.TestPAIParser.test_two_dc_change_with_eq test.test_dataclass_json.TestPAIParser.test_two_dc_change
     test.test_dataclass_list.TestDataClassList.test_data_class_list test.test_dataclass_list.TestDataClassList.test_data_class_list_default
-    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_no_subclass test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices
+    test.test_dataclass_list.TestDataClassList.test_data_class_list_with_choices_not_available
     test.test_dataclass_list.TestDataClassList.test_data_class_list_with_default test.test_dataclass_list.TestDataClassList.test_primitive_list
     test.test_dataclass_list.TestDataClassList.test_primitive_list_default test.test_dataclass_set.TestDataClassList.test_primitive_set
     test.test_dataclass_set.TestDataClassList.test_primitive_set_default test.test_default_value.TestPAIParserDefault.test_required
@@ -2616,8 +2807,9 @@ steps:
     test.test_default_value.TestPAIParserDefault.test_setting_second_level test.test_dict.TestDict.test_primitive
     test.test_dict.TestDict.test_primitive_default test.test_dict.TestDict.test_str_dataclass_dict
     test.test_dict.TestDict.test_str_dataclass_dict_default test.test_dict.TestDict.test_str_dataclass_dict_default_field
-    test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict test.test_generic_data_class.TestGenericDataClass.test_genertic
-    test.test_ignore.TestIgnore.test_dict test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
+    test.test_dict.TestDict.test_str_dataclass_dict_no_subclass test.test_generic_data_class.TestGenericDataClass.test_generic_parse_dict
+    test.test_generic_data_class.TestGenericDataClass.test_genertic test.test_ignore.TestIgnore.test_dict
+    test.test_ignore.TestIgnore.test_list test.test_ignore.TestIgnore.test_primitive
     test.test_meta.TestPAIParser.test_three_dc test.test_multi_args.TestPAIParser.test_three_dc
     test.test_multi_args.TestPAIParser.test_three_dc_required test.test_optional.TestOptional.test_optionals
     test.test_optional.TestOptional.test_optionals_args test.test_ssnake.TestSSnake.test_ssnake
