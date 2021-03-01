@@ -3,7 +3,6 @@ import sys
 from argparse import ArgumentParser, Action, SUPPRESS, ArgumentDefaultsHelpFormatter, Namespace
 from dataclasses import MISSING, is_dataclass
 from typing import Any, Dict, NamedTuple, Optional, List, Union
-import editdistance
 
 from paiargparse.dataclass_extractor import extract_args_of_dataclass, ArgumentField, str_to_enum, enum_choices, \
     str_to_bool
@@ -159,6 +158,7 @@ def add_dataclass_field(
         ignore: List[str],
         dc_type=None,
         arg_field: Optional[ArgumentField] = None,
+        override_flat=False,
 ):
     """
     Add a new sub group to the parser based on the values of a data class
@@ -232,10 +232,10 @@ def add_dataclass_field(
         sep = arg.meta.get('separator', DEFAULT_SEPARATOR)
         mode = arg.meta.get('mode', 'snake')
         assert (mode != 'ignore')
-        if mode == 'snake':
-            full_arg_name = f"{prefix}{param_name}{sep}"
-        elif mode == 'flat':
+        if mode == 'flat' or override_flat:
             full_arg_name = ''
+        elif mode == 'snake':
+            full_arg_name = f"{prefix}{param_name}{sep}"
         elif mode == 'ssnake':
             full_arg_name = prefix  # ignore previous param name and separator
         else:
@@ -360,7 +360,8 @@ class PAIDataClassArgumentParser(ArgumentParser):
 
         return dc
 
-    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = MISSING, ignore: List[str] = None):
+    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = MISSING, ignore: List[str] = None,
+                          flat=False):
         if ignore is None:
             ignore = []
 
@@ -373,25 +374,40 @@ class PAIDataClassArgumentParser(ArgumentParser):
                                                              default_value=default,
                                                              value=None,
                                                              )
-        self.add_dc_argument(
-            self._params_tree.dcs[param_name].dcs,
-            prefix='',
-            parent=self._params_tree.dcs,
-            arg_field=ArgumentField(
-                param_name,
-                dc_type,
-                {},
-                False,
-                [],
-                True,
-                default,
-                required=False,
-                enum=None,
-                dict_type=None,
-            ),
-            ignore=ignore,
-            override_missing=True,
+        arg_field = ArgumentField(
+            param_name,
+            dc_type,
+            {},
+            False,
+            None,
+            True,
+            default,
+            required=False,
+            enum=None,
+            dict_type=None,
         )
+        if flat:
+            # Flat, add all field of the dataclass
+            pai_node = self._params_tree.dcs[param_name]
+            default = DefaultArg(
+                pai_node.parsed_type,
+                pai_node.default_value,
+                param_name,
+                override_missing=True,
+            )
+            self._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
+            add_dataclass_field(self, pai_node, '', self._params_tree.dcs[param_name].dcs,
+                                default_dict_key_value(default), arg_field=arg_field, ignore=ignore, override_flat=True)
+        else:
+            # Not flat, add it as argument
+            self.add_dc_argument(
+                self._params_tree.dcs[param_name].dcs,
+                prefix='',
+                parent=self._params_tree.dcs,
+                arg_field=arg_field,
+                ignore=ignore,
+                override_missing=True,
+            )
 
     def add_dc_argument(self,
                         root: dict,
@@ -425,7 +441,8 @@ class PAIDataClassArgumentParser(ArgumentParser):
                     for i, value in enumerate(values):
                         module, class_name = value.split(":")
                         sub_dc_type = getattr(importlib.import_module(module), class_name)
-                        if not meta.get('disable_subclass_check', False) and not issubclass(sub_dc_type, arg_field.type):
+                        if not meta.get('disable_subclass_check', False) and not issubclass(sub_dc_type,
+                                                                                            arg_field.type):
                             raise TypeError(
                                 f"Data class {sub_dc_type} must inherit {arg_field.type} to allow usage as "
                                 f"replacement. But parents are {sub_dc_type.__mro__}")
@@ -457,6 +474,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
             flag,
             override_missing=override_missing,
         )
+        self._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
 
         def make_action():
             if arg_field.list:
@@ -465,8 +483,6 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 raise NotImplementedError
             else:
                 return DataClassAction, None
-
-        self._default_data_classes_to_set_after_next_run[default_dict_key_value(default)] = default
 
         if arg_field.meta.get('fix_dc', False):
             # if the dataclass is fixed, just add it right away
@@ -542,4 +558,3 @@ class PAIDataClassArgumentParser(ArgumentParser):
             names.append(choice.__alt_name__)
 
         return names
-

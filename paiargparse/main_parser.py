@@ -11,6 +11,8 @@ from paiargparse.dataclass_parser import PAIDataClassArgumentParser, UnknownArgu
 class PAIArgumentParser(ArgumentParser):
     """
     Argument parser based on hierarchical dataclasses
+
+    Call `add_root_argument("arg", DataClass)` to add a dataclass to the arguments
     """
 
     def __init__(self,
@@ -20,12 +22,14 @@ class PAIArgumentParser(ArgumentParser):
                  root_parser: 'PAIArgumentParser' = None,
                  allow_abbrev=False,
                  *args, **kwargs):
-        super(PAIArgumentParser, self).__init__(add_help=False, formatter_class=formatter_class, allow_abbrev=allow_abbrev, *args, **kwargs)
+        super(PAIArgumentParser, self).__init__(add_help=False, formatter_class=formatter_class,
+                                                allow_abbrev=allow_abbrev, *args, **kwargs)
         self.root_parser = root_parser if root_parser else self
         self._all_actions = []
 
         self._data_class_parser = self._data_class_argument_parser_cls()(
-            add_help=add_help, formatter_class=formatter_class, ignore_required=ignore_required, allow_abbrev=allow_abbrev)
+            add_help=add_help, formatter_class=formatter_class, ignore_required=ignore_required,
+            allow_abbrev=allow_abbrev)
 
         # Register the custom subparser that stores the root parser
         self._registries['action']['parsers'] = partial(_SubParsersActionWithRoot, root_parser=self.root_parser)
@@ -33,8 +37,9 @@ class PAIArgumentParser(ArgumentParser):
     def _data_class_argument_parser_cls(self) -> Type[PAIDataClassArgumentParser]:
         return PAIDataClassArgumentParser
 
-    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = MISSING, ignore: List[str] = None):
-        self._data_class_parser.add_root_argument(param_name, dc_type, default, ignore=ignore)
+    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = MISSING, ignore: List[str] = None,
+                          flat=False):
+        self._data_class_parser.add_root_argument(param_name, dc_type, default, ignore=ignore, flat=flat)
 
     def parse_known_args(self, args=None, namespace=None):
         # parse args that match the default arg parser
@@ -86,6 +91,7 @@ class _SubParsersActionWithRoot(_SubParsersAction):
     """
     Override SubParsers action to store the root parsers and pass it to PAIArgParser on construction (add_parse)
     """
+
     def __init__(self, *args, root_parser, **kwargs):
         super(_SubParsersActionWithRoot, self).__init__(*args, **kwargs)
         self.root_parser = root_parser

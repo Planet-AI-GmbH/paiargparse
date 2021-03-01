@@ -86,6 +86,18 @@ class TestPAIParser(unittest.TestCase):
         self.assertEqual(dc.l.p1, -13)
         self.assertEqual(dc.l.p1a, 0.5)
 
+    def test_two_dc_change_flat(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('arg', Level1, flat=True)
+        args = parser.parse_args(
+            args=['--l.p1', '-13', '--l', 'test.test_data_class:Level2a', '--l.p1a', '0.5'])
+        dc = args.arg
+
+        self.assertIsInstance(dc, Level1)
+        self.assertIsInstance(dc.l, Level2a)
+        self.assertEqual(dc.l.p1, -13)
+        self.assertEqual(dc.l.p1a, 0.5)
+
     def test_two_dc_change_with_eq(self):
         parser = PAIArgumentParser()
         parser.add_root_argument('arg', Level1)
