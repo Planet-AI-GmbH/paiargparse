@@ -18,7 +18,6 @@ setup(
     download_url='https://github.com/Planet-AI-GmbH/paiargparse/archive/{}.tar.gz'.format(__version__),
     python_requires='>=3.7',
     install_requires=open(os.path.join(this_dir, "requirements.txt")).read().split('\n'),
-    test_requires=open(os.path.join(this_dir, "test_requirements.txt")).read().split('\n'),
     keywords=['argument parser', 'dataclass', 'hierarchical'],
     data_files=[('', [os.path.join(this_dir, "requirements.txt")])],
 )

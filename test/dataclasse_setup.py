@@ -68,15 +68,15 @@ class Level1Required:
 
 @pai_dataclass
 @dataclass
-class TestMetaLevel2:
+class DCTestMetaLevel2:
     p: str = field(default='', metadata=pai_meta(separator='+'))
 
 
 @pai_dataclass
 @dataclass
-class TestMetaLevel1:
+class DCTestMetaLevel1:
     p: int = 0
-    sub: TestMetaLevel2 = field(default_factory=TestMetaLevel2, metadata=pai_meta(
+    sub: DCTestMetaLevel2 = field(default_factory=DCTestMetaLevel2, metadata=pai_meta(
         help='Help str',
         separator='/',
     ))
@@ -84,5 +84,5 @@ class TestMetaLevel1:
 
 @pai_dataclass
 @dataclass
-class TestWithRequiredMeta:
+class DCTestWithRequiredMeta:
     p: int = field(default=1, metadata=pai_meta(required=True))
