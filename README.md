@@ -1,3 +1,6 @@
+[![Python package](https://github.com/Planet-AI-GmbH/paiargparse/actions/workflows/python-package.yml/badge.svg)](https://github.com/Planet-AI-GmbH/paiargparse/actions/workflows/python-package.yml)
+[![Upload Python Package](https://github.com/Planet-AI-GmbH/paiargparse/actions/workflows/python-publish.yml/badge.svg)](https://github.com/Planet-AI-GmbH/paiargparse/actions/workflows/python-publish.yml)
+
 # PAI Argument Parser
 
 The PAI Argument Parser extends the common python argument parser by allowing to automatically parse and add arguments 
