@@ -1,9 +1,8 @@
 import json
 import os
 import unittest
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 import sys
-
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -46,4 +45,19 @@ class TestCmdLine(unittest.TestCase):
                             '--req_int', '5',
                             '--child', 'examples.structures.flat:Child2'])
         p = Parent.from_json(out)
+        self.assertIsInstance(p.child, Child2)
+
+    def test_mixed(self):
+        from examples.structures.hierarchical import Child1, Parent, Child2
+        with self.assertRaises(CalledProcessError):
+            out = check_output([sys.executable, 'run_mixed.py', '--req_int', '10'])
+
+        out = check_output([sys.executable, 'run_mixed.py', '--required_arg=1', 'positional_arg'])
+        p = Parent.from_dict(json.loads(out)['root'])
+        self.assertIsInstance(p.child, Child1)
+
+        out = check_output([sys.executable,
+                            'run_mixed.py', '--required_arg=1', 'positional_arg',
+                            '--root.child', 'examples.structures.hierarchical:Child2'])
+        p = Parent.from_dict(json.loads(out)['root'])
         self.assertIsInstance(p.child, Child2)

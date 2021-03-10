@@ -1,9 +1,10 @@
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, _SubParsersAction
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, _SubParsersAction, SUPPRESS, Namespace
 from dataclasses import MISSING
 from functools import partial
 from typing import Any, List, Type
 
 import editdistance
+import sys
 
 from paiargparse.dataclass_parser import PAIDataClassArgumentParser, UnknownArgumentError
 
@@ -26,9 +27,10 @@ class PAIArgumentParser(ArgumentParser):
                                                 allow_abbrev=allow_abbrev, *args, **kwargs)
         self.root_parser = root_parser if root_parser else self
         self._all_actions = []
+        self._add_help = add_help  # store if help should be set
 
         self._data_class_parser = self._data_class_argument_parser_cls()(
-            add_help=add_help, formatter_class=formatter_class, ignore_required=ignore_required,
+            add_help=False, formatter_class=formatter_class, ignore_required=ignore_required,
             allow_abbrev=allow_abbrev)
 
         # Register the custom subparser that stores the root parser
@@ -42,14 +44,33 @@ class PAIArgumentParser(ArgumentParser):
         self._data_class_parser.add_root_argument(param_name, dc_type, default, ignore=ignore, flat=flat)
 
     def parse_known_args(self, args=None, namespace=None):
-        # parse args that match the default arg parser
-        namespace, args = super(PAIArgumentParser, self).parse_known_args(args, namespace)
+        # parse args that match the default arg parser, first this, because these actions are allowed to add
+        # additional "dataclass args"
+        try:
+            namespace, args = super(PAIArgumentParser, self).parse_known_args(args, namespace)
+        except SystemExit as e:
+            # store if an exception occurred
+            exception = e
+        else:
+            exception = None
 
         # (recursively) parse args that match the data class arg parser
         namespace, args = self._data_class_parser.parse_known_args(args, namespace)
 
         # Collect all known args, since now the args might have changes after parsing
         self._collect_all_actions()
+
+        if self._add_help:
+            # add help as last
+            self.add_argument(
+                '-h', '--help',
+                action='help', default=SUPPRESS,
+                help='show this help message and exit')
+            if len(args) > 0 and args[0] in {'-h', '--help'}:
+                return super(PAIArgumentParser, self).parse_known_args(args, namespace)
+
+        if exception:
+            exit(1)
 
         # Ok!
         return namespace, args
@@ -69,6 +90,29 @@ class PAIArgumentParser(ArgumentParser):
         This will be used to display alternatives on unknown args
         """
         self.root_parser._all_actions.extend(self._actions + self._data_class_parser._actions)
+
+    def format_help(self):
+        formatter = self._get_formatter()
+
+        # usage
+        formatter.add_usage(self.usage, self._actions,
+                            self._mutually_exclusive_groups)
+
+        # description
+        formatter.add_text(self.description)
+
+        # positionals, optionals and user-defined groups
+        for action_group in self._action_groups + self._data_class_parser._action_groups:
+            formatter.start_section(action_group.title)
+            formatter.add_text(action_group.description)
+            formatter.add_arguments(action_group._group_actions)
+            formatter.end_section()
+
+        # epilog
+        formatter.add_text(self.epilog)
+
+        # determine help from format above
+        return formatter.format_help()
 
 
 def find_alt_actions(argv: List[str], actions) -> List[str]:

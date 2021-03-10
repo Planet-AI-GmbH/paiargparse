@@ -531,15 +531,6 @@ class PAIDataClassArgumentParser(ArgumentParser):
         for name, v in self._params_tree.dcs.items():
             setattr(namespace, name, self._tree_to_data_class(v))
 
-        if self._add_help:
-            # add help as last
-            self.add_argument(
-                '-h', '--help',
-                action='help', default=SUPPRESS,
-                help='show this help message and exit')
-            if len(args) > 0 and args[0] in {'-h', '--help'}:
-                return super(PAIDataClassArgumentParser, self).parse_known_args(args, namespace)
-
         return namespace, args
 
     def parse_args(self, args=None, namespace=None):
