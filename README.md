@@ -43,6 +43,13 @@ python my_program.py --myArgs.required_int_arg 1 --myArgs.sub_params.required_fl
 
 Since the parsing is performed dynamically, the help (`-h`) always shows the current state of parsing.
 
+## Setup
+
+To setup install the paiargparse pip package:
+```shell
+pip install paiargparse
+```
+
 ## Supported Types
 
 The following is a list of supported types, and how to access/write their values via the command line
