@@ -1,10 +1,9 @@
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, _SubParsersAction, SUPPRESS, Namespace
-from dataclasses import MISSING
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, _SubParsersAction, SUPPRESS, Action
+from dataclasses import MISSING, is_dataclass
 from functools import partial
 from typing import Any, List, Type
 
 import editdistance
-import sys
 
 from paiargparse.dataclass_parser import PAIDataClassArgumentParser, UnknownArgumentError
 
@@ -18,6 +17,7 @@ class PAIArgumentParser(ArgumentParser):
 
     def __init__(self,
                  add_help=True,
+                 add_show=True,
                  formatter_class=ArgumentDefaultsHelpFormatter,
                  ignore_required=False,
                  root_parser: 'PAIArgumentParser' = None,
@@ -28,6 +28,7 @@ class PAIArgumentParser(ArgumentParser):
         self.root_parser = root_parser if root_parser else self
         self._all_actions = []
         self._add_help = add_help  # store if help should be set
+        self._add_show = add_show
 
         self._data_class_parser = self._data_class_argument_parser_cls()(
             add_help=False, formatter_class=formatter_class, ignore_required=ignore_required,
@@ -35,6 +36,7 @@ class PAIArgumentParser(ArgumentParser):
 
         # Register the custom subparser that stores the root parser
         self._registries['action']['parsers'] = partial(_SubParsersActionWithRoot, root_parser=self.root_parser)
+        self.register('action', 'show', _ShowParametersAction)
 
     def _data_class_argument_parser_cls(self) -> Type[PAIDataClassArgumentParser]:
         return PAIDataClassArgumentParser
@@ -60,6 +62,14 @@ class PAIArgumentParser(ArgumentParser):
         # Collect all known args, since now the args might have changes after parsing
         self._collect_all_actions()
 
+        if self._add_show:
+            # add help as last
+            self.add_argument(
+                '--show',
+                action='show', default=SUPPRESS,
+                help='show the parsed parameters')
+            if len(args) > 0 and args[0] in {'--show'}:
+                return super(PAIArgumentParser, self).parse_known_args(args, namespace)
         if self._add_help:
             # add help as last
             self.add_argument(
@@ -142,3 +152,29 @@ class _SubParsersActionWithRoot(_SubParsersAction):
 
     def add_parser(self, *args, **kwargs):
         return super(_SubParsersActionWithRoot, self).add_parser(*args, root_parser=self.root_parser, **kwargs)
+
+
+class _ShowParametersAction(Action):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, nargs=0, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        print("============================================================================")
+        print("Parsed and default values of the available arguments:")
+        for k, v in vars(namespace).items():
+            if is_dataclass(v):
+                continue
+            print(f"    {k}={v}")
+
+        print()
+        print("============================================================================")
+        print("Resulting data classes:")
+        for k, v in vars(namespace).items():
+            if not is_dataclass(v):
+                continue
+            print()
+            print(f"{k}={v.to_json(indent=2)}")
+
+        print()
+        print("============================================================================")
+        exit(0)
