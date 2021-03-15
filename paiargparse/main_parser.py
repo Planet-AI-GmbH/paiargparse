@@ -161,7 +161,7 @@ class _ShowParametersAction(Action):
     def __call__(self, parser, namespace, values, option_string=None):
         print("============================================================================")
         print("Parsed and default values of the available arguments:")
-        for k, v in vars(namespace).items():
+        for k, v in sorted(vars(namespace).items()):
             if is_dataclass(v):
                 continue
             print(f"    {k}={v}")
