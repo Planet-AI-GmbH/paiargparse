@@ -114,6 +114,8 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                     v = field.dict_type(v)
                     arg.value[k] = v
 
+                setattr(args, self.dest, arg.value)
+
         return DictParserAction
     else:
         class FieldSetterAction(Action):
@@ -121,6 +123,7 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                 if field.optional:
                     if is_none(values):
                         arg.value = None
+                        setattr(args, self.dest, None)
                         return
 
                 is_str_type = field.enum or field.dict_type or field.type == bool or field.type == str
@@ -145,6 +148,8 @@ def generate_field_action(pai_node: PAINodeDataClass, arg: PAINode, field: Argum
                         if not is_str_type:
                             values = field.type(values)
                         arg.value = values
+
+                setattr(args, self.dest, arg.value)
 
         return FieldSetterAction
 
@@ -468,9 +473,12 @@ class PAIDataClassArgumentParser(ArgumentParser):
                     add_dataclass_field(parser, root_dcs[str(i)], f"{prefix}{param_name}{sep}", root_dcs[str(i)].dcs,
                                         values=None, dc_type=dc_type, ignore=ignore)
 
+                setattr(args, self.dest, " ".join(pai_node.dcs[str(i)].value for i, _ in enumerate(dc_types)))
+
         class DataClassAction(Action):
             def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
                 add_dataclass_field(parser, pai_node, prefix, root, values, arg_field=arg_field, ignore=ignore)
+                setattr(args, self.dest, pai_node.value)
 
         flag = f'{prefix}{param_name}'
         if any(flag.startswith(ignore_prefixes) for ignore_prefixes in ignore):
