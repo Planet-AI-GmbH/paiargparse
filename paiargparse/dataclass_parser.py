@@ -439,13 +439,21 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 else:
                     dc_types = []
                     for i, value in enumerate(values):
-                        module, class_name = value.split(":")
-                        sub_dc_type = getattr(importlib.import_module(module), class_name)
-                        if not meta.get('disable_subclass_check', False) and not issubclass(sub_dc_type,
-                                                                                            arg_field.type):
-                            raise TypeError(
-                                f"Data class {sub_dc_type} must inherit {arg_field.type} to allow usage as "
-                                f"replacement. But parents are {sub_dc_type.__mro__}")
+                        choices = {}
+                        if arg_field is not None and meta.get('choices', None) is not None:
+                            for choice in meta['choices']:
+                                for name in parser.alt_names_of_choice(choice):
+                                    choices[name] = choice
+                        if value in choices:
+                            sub_dc_type = choices[value]
+                        else:
+                            module, class_name = value.split(":")
+                            sub_dc_type = getattr(importlib.import_module(module), class_name)
+                            if not meta.get('disable_subclass_check', False) and not issubclass(sub_dc_type,
+                                                                                                arg_field.type):
+                                raise TypeError(
+                                    f"Data class {sub_dc_type} must inherit {arg_field.type} to allow usage as "
+                                    f"replacement. But parents are {sub_dc_type.__mro__}")
                         dc_types.append(sub_dc_type)
                     defaults = [None] * len(dc_types)
 
