@@ -452,7 +452,20 @@ class PAIDataClassArgumentParser(ArgumentParser):
                         if value in choices:
                             sub_dc_type = choices[value]
                         else:
-                            module, class_name = value.split(":")
+                            try:
+                                module, class_name = value.split(":")
+                            except ValueError as e:
+                                if len(choices) > 0:
+                                    raise ValueError(
+                                        f"Invalid class name {value}. Must either be 'module_path:class_name' "
+                                        f"or in {set(choices.keys())}"
+                                    ) from e
+                                else:
+                                    raise ValueError(
+                                        f"Invalid class name {value}. Must be 'module_path:class_name' since no "
+                                        f"choices (metadata=pai_meta(choies=[...])) are defined."
+                                    ) from e
+
                             sub_dc_type = getattr(importlib.import_module(module), class_name)
                             if not meta.get('disable_subclass_check', False) and not issubclass(sub_dc_type,
                                                                                                 arg_field.type):
