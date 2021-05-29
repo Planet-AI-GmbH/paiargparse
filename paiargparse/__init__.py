@@ -1,4 +1,4 @@
-__version__ = "1.0.6"
+__version__ = "1.1.0"
 
 from paiargparse.dataclass_meta import pai_meta, pai_dataclass
 from paiargparse.main_parser import PAIArgumentParser
