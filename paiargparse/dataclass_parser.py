@@ -212,7 +212,9 @@ def add_dataclass_field(
                     if choices:
                         raise ValueError(
                             f"Invalid module and class name {values}. Must be 'path.to.module:class_name' or in {list(choices.keys())}")
-                    raise ValueError(f"Invalid module and class name {values}. Must be 'path.to.module:class_name'")
+                    raise ValueError(f"Invalid module and class name {values}. Must be 'path.to.module:class_name'."
+                                     f"As developer set pai_meta(tuple_like=True) if you want this field to behave "
+                                     f"similar to a tuple.")
                 dc_type = getattr(importlib.import_module(module), class_name)
 
         if not is_dataclass(dc_type):
@@ -258,6 +260,7 @@ def add_dataclass_field(
                                    parent=parent_pcs,
                                    arg_field=arg,
                                    ignore=ignore,
+                                   override_missing=arg.meta.get('fix_dc', False),
                                    )
         else:
             full_arg_name += arg.name
@@ -428,6 +431,25 @@ class PAIDataClassArgumentParser(ArgumentParser):
         nargs = arg_field.meta.get('nargs', '*')
         pai_node = parent[param_name]
 
+        class DataClassAsTupleAction(Action):
+            def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
+                fields = extract_args_of_dataclass(dc_type)
+                if len(values) > len(pai_node.params):
+                    raise ValueError(f"Got {len(values)} arguments but only {len(fields)} are available. \n"
+                                     f"  Available: {[t.name for t in fields]}\n"
+                                     f"     Parsed: {values}")
+                for src, t in zip(values, fields):
+                    is_str_type = t.enum or t.dict_type or t.type == bool or t.type == str
+                    target = pai_node.params[t.name]
+                    if t.optional and is_none(src):
+                        target.value = None
+                    elif t.enum:
+                        target.value = str_to_enum(src, t.enum, t.type)
+                    else:
+                        if not is_str_type:
+                            src = t.type(src)
+                        target.value = src
+
         class ListDataClassAction(Action):
             def __call__(self, parser: 'PAIDataClassArgumentParser', args, values, option_string=None):
                 meta = arg_field.meta
@@ -463,7 +485,7 @@ class PAIDataClassArgumentParser(ArgumentParser):
                                 else:
                                     raise ValueError(
                                         f"Invalid class name {value}. Must be 'module_path:class_name' since no "
-                                        f"choices (metadata=pai_meta(choies=[...])) are defined."
+                                        f"choices (metadata=pai_meta(choices=[...])) are defined."
                                     ) from e
 
                             sub_dc_type = getattr(importlib.import_module(module), class_name)
@@ -514,11 +536,14 @@ class PAIDataClassArgumentParser(ArgumentParser):
                 return DataClassAction, None
 
         if arg_field.meta.get('fix_dc', False):
-            # if the dataclass is fixed, just add it right away
+            # if the dataclass is fixed, just add it right away,
+            # add the option to set as tuple instead
             if arg_field.list or arg_field.dict_type:
                 raise ValueError("Only a standard field can be fixed")
             add_dataclass_field(self, pai_node, prefix, root, default_dict_key_value(default), arg_field=arg_field,
                                 ignore=ignore)
+            if arg_field.meta.get('tuple_like', False):
+                self.add_argument('--' + flag, action=DataClassAsTupleAction, nargs="*", type=str)
         else:
             action, nargs = make_action()
             self.add_argument('--' + flag,

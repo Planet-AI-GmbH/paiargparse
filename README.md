@@ -272,12 +272,13 @@ Set the `metadata`-argument of `field` to `pai_meta` to enrich the information f
 
 | argname | default | description | example |
 | --- | --- | --- | --- |
-| help | `None` | The helpstring to print when calling -h | `pai_meta(help="Show the help")` |
-| separator | `"."` | The separator for concatenating hierarchial args, e.g. `/` to use `parent/sub` | `pai_meta(separator="/")` |
+| help | `None` | The help string to print when calling -h | `pai_meta(help="Show the help")` |
+| separator | `"."` | The separator for concatenating hierarchical args, e.g. `/` to use `parent/sub` | `pai_meta(separator="/")` |
 | mode | `"snake"` | Use `"ignore"` to ignore this field from the command line, use `"flat"` to add the argument as a new root argument, i.e. no prefixes will be added, use `"snake"` for the default mode of snaking all arguments with the separator, use `"ssnake"` to drop only the parent prefix of one hierachy` | `pai_meta(mode="ignore")` |
 | required | `None` | Set to `True` or `False` to force if this parameter must be set from the command line even though a default value is given | `pai_meta(required=True)` | 
 | nargs | `*` | Override the default `nargs` field for list, set, or dict fields. The alternative `+` forces to add at least one element to the list. | `pai_meta(nargs="+")` |
 | choices | `None` | A list of choices the select from when using lists, sets or subdataclasses. Only the class name must be set in the command line if the class is present in choices (instead of the full path) | `pai_meta(choices=[SubClass1, SubClass2])`
 | disable_subclass_check | `False` | By default changing the type of a class via the command line requires that the new class is a subclass of the type of the dataclass field. Use this flag to disable this check. | `pai_meta(disable_subclass_check=True` |
 | enforce_choices | `None` | Override the default choices checking. For dataclasses, it is permitted to select dataclasses that are not in choices, for primitive types they must be within choices | `pai_meta(enforce_choices=True)` |
-| fix_dc | `False` | Set to true to forbit overriding of a dataclass via the command line | `pai_meta(fix_dc=True)` | 
+| fix_dc | `False` | Set to true to forbid overriding of a dataclass via the command line. | `pai_meta(fix_dc=True)` | 
+| tuple_like | `False` | This enables also to set values similar to tuples by passing a list to the dataclass argument instead of accessing all child arguments. Automatically sets "fix_dc" | `pai_meta(tuple_like=True)` | 

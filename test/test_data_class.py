@@ -3,7 +3,7 @@ import unittest
 from paiargparse import PAIArgumentParser, RequiredArgumentError
 from paiargparse.dataclass_parser import InvalidChoiceError
 from test.dataclasse_setup import Level1b, Level2, Level1, Level2a, Level3a, DCTestWithRequiredMeta, \
-    Level1Required, Level3aa, Level3base
+    Level1Required, Level3aa, Level3base, DCTestWithFixedFlat
 
 
 class TestPAIParser(unittest.TestCase):
@@ -109,6 +109,18 @@ class TestPAIParser(unittest.TestCase):
         self.assertIsInstance(dc.l, Level2a)
         self.assertEqual(dc.l.p1, -13)
         self.assertEqual(dc.l.p1a, 0.5)
+
+    def test_dc_with_fixed_flat(self):
+        parser = PAIArgumentParser()
+        parser.add_root_argument('arg', DCTestWithFixedFlat)
+        args = parser.parse_args(
+            args=['--arg.p', '0', 'asdf'])
+        dc = args.arg
+
+        self.assertIsInstance(dc.p, Level1b)
+        self.assertEqual(dc.p.p1, 0)
+        self.assertEqual(dc.p.p2, 'asdf')
+
 
 if __name__ == '__main__':
     unittest.main()

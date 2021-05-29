@@ -86,3 +86,9 @@ class DCTestMetaLevel1:
 @dataclass
 class DCTestWithRequiredMeta:
     p: int = field(default=1, metadata=pai_meta(required=True))
+
+
+@pai_dataclass
+@dataclass
+class DCTestWithFixedFlat:
+    p: Level1b = field(metadata=pai_meta(tuple_like=True))

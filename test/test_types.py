@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import field, dataclass
 from enum import IntEnum, Enum
-from typing import List, Optional
+from typing import List, Optional, NamedTuple
 
 from paiargparse import PAIArgumentParser, pai_dataclass
 

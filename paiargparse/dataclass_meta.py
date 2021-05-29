@@ -18,6 +18,7 @@ def pai_meta(*,
              disable_subclass_check=False,
              enforce_choices=None,  # if choices are dataclass, defaults to False, else True
              fix_dc=False,  # if True, the dataclass can not be overwritten
+             tuple_like=False,  # if True, enable fix dc and enable to set values similar to tuples
              ):
     assert (separator in '/._-+')
     assert (mode in {'snake', 'ignore', 'flat', 'ssnake'})
@@ -39,6 +40,8 @@ def pai_meta(*,
 
     if enforce_choices and choices is None:
         raise ValueError("If enforcing choices, choices are required.")
+    if tuple_like:
+        fix_dc = True
     return locals()
 
 
