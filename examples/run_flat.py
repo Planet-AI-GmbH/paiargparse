@@ -2,7 +2,7 @@ from examples.structures.flat import Parent
 from paiargparse import PAIArgumentParser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = PAIArgumentParser()
     parser.add_root_argument("root", Parent)
     args = parser.parse_args()

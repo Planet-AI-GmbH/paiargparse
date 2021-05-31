@@ -2,6 +2,7 @@ from dataclasses import field, dataclass
 
 from paiargparse import pai_meta, pai_dataclass
 
+
 @pai_dataclass
 @dataclass
 class Level3base:
@@ -24,7 +25,9 @@ class Level3aa(Level3a):
 @dataclass
 class Level2:
     p1: int = 0
-    lvl3: Level3base = field(default_factory=Level3a, metadata=pai_meta(choices=[Level3a, Level3aa], enforce_choices=True))
+    lvl3: Level3base = field(
+        default_factory=Level3a, metadata=pai_meta(choices=[Level3a, Level3aa], enforce_choices=True)
+    )
 
 
 @pai_dataclass
@@ -57,7 +60,7 @@ class Level1(Level1Base):
 @dataclass
 class Level1b(Level1Base):
     p1: int
-    p2: str = ''
+    p2: str = ""
 
 
 @pai_dataclass
@@ -69,17 +72,20 @@ class Level1Required:
 @pai_dataclass
 @dataclass
 class DCTestMetaLevel2:
-    p: str = field(default='', metadata=pai_meta(separator='+'))
+    p: str = field(default="", metadata=pai_meta(separator="+"))
 
 
 @pai_dataclass
 @dataclass
 class DCTestMetaLevel1:
     p: int = 0
-    sub: DCTestMetaLevel2 = field(default_factory=DCTestMetaLevel2, metadata=pai_meta(
-        help='Help str',
-        separator='/',
-    ))
+    sub: DCTestMetaLevel2 = field(
+        default_factory=DCTestMetaLevel2,
+        metadata=pai_meta(
+            help="Help str",
+            separator="/",
+        ),
+    )
 
 
 @pai_dataclass

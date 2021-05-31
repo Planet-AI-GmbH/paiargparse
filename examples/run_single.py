@@ -3,7 +3,7 @@ import json
 from examples.structures.single import ParamSet1, ParamSet2
 from paiargparse import PAIArgumentParser
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = PAIArgumentParser()
 
     # ParamSet 1
@@ -15,4 +15,4 @@ if __name__ == '__main__':
     # parse args
     args = parser.parse_args()
 
-    print(json.dumps({'set1': args.set1.to_dict(), 'set2': args.set2.to_dict()}))
+    print(json.dumps({"set1": args.set1.to_dict(), "set2": args.set2.to_dict()}))

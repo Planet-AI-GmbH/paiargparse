@@ -41,10 +41,13 @@ class DCPrimitve:
 class TestDataClassList(unittest.TestCase):
     def test_primitive_list(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DCPrimitve)
+        parser.add_root_argument("root", DCPrimitve)
         dc: DCPrimitve = parser.parse_args(
             [
-                '--root.l', '0', '1', '0',
+                "--root.l",
+                "0",
+                "1",
+                "0",
             ]
         ).root
 
@@ -53,77 +56,72 @@ class TestDataClassList(unittest.TestCase):
 
     def test_primitive_list_default(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DCPrimitve, DCPrimitve(dl=[4, 5]))
-        dc: DCPrimitve = parser.parse_args(
-            [
-            ]
-        ).root
+        parser.add_root_argument("root", DCPrimitve, DCPrimitve(dl=[4, 5]))
+        dc: DCPrimitve = parser.parse_args([]).root
 
         self.assertListEqual(dc.l, [])
         self.assertListEqual(dc.dl, [4, 5])
 
     def test_data_class_list(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DC)
+        parser.add_root_argument("root", DC)
         dc: DC = parser.parse_args(
             [
-                '--root.l', 'test.test_dataclass_list:Sub', 'test.test_dataclass_list:Sub',
-                '--root.l.1.int_arg', '-2',
-                '--root.l.0.sub_sub.int_arg', '10',
+                "--root.l",
+                "test.test_dataclass_list:Sub",
+                "test.test_dataclass_list:Sub",
+                "--root.l.1.int_arg",
+                "-2",
+                "--root.l.0.sub_sub.int_arg",
+                "10",
             ]
         ).root
 
-        self.assertListEqual(
-            [Sub(int_arg=-1, sub_sub=SubSub(int_arg=10)), Sub(int_arg=-2)],
-            dc.l
-        )
+        self.assertListEqual([Sub(int_arg=-1, sub_sub=SubSub(int_arg=10)), Sub(int_arg=-2)], dc.l)
 
     def test_data_class_list_no_subclass(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DC)
+        parser.add_root_argument("root", DC)
         with self.assertRaises(TypeError):
             dc: DC = parser.parse_args(
                 [
-                    '--root.l', 'test.test_dataclass_list:SubSub',
+                    "--root.l",
+                    "test.test_dataclass_list:SubSub",
                 ]
             ).root
 
     def test_data_class_list_default(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DC, DC(l=[Sub(int_arg=-1), Sub(int_arg=-2)]))
+        parser.add_root_argument("root", DC, DC(l=[Sub(int_arg=-1), Sub(int_arg=-2)]))
         dc: DC = parser.parse_args(
             [
-                '--root.l.1.int_arg', '-4',
+                "--root.l.1.int_arg",
+                "-4",
             ]
         ).root
 
-        self.assertListEqual(
-            [Sub(int_arg=-1), Sub(int_arg=-4)],
-            dc.l
-        )
+        self.assertListEqual([Sub(int_arg=-1), Sub(int_arg=-4)], dc.l)
 
     def test_data_class_list_with_default(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DCWithDefault)
+        parser.add_root_argument("root", DCWithDefault)
         dc: DCWithDefault = parser.parse_args(
             [
-                '--root.l.1.int_arg', '-4',
+                "--root.l.1.int_arg",
+                "-4",
             ]
         ).root
 
-        self.assertListEqual(
-            [Sub(int_arg=-2), Sub(int_arg=-4)],
-            dc.l
-        )
+        self.assertListEqual([Sub(int_arg=-2), Sub(int_arg=-4)], dc.l)
 
     def test_data_class_list_with_choices(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DCPrimitve)
-        dc: DCPrimitve = parser.parse_args(['--root.dlc', '2', '2', '5']).root
+        parser.add_root_argument("root", DCPrimitve)
+        dc: DCPrimitve = parser.parse_args(["--root.dlc", "2", "2", "5"]).root
         self.assertListEqual(dc.dlc, [2, 2, 5])
 
     def test_data_class_list_with_choices_not_available(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DCPrimitve)
+        parser.add_root_argument("root", DCPrimitve)
         with self.assertRaises(SystemExit):
-            dc: DCPrimitve = parser.parse_args(['--root.dlc', '2', '2', '50']).root
+            dc: DCPrimitve = parser.parse_args(["--root.dlc", "2", "2", "50"]).root

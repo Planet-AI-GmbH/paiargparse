@@ -9,7 +9,7 @@ from paiargparse.dataclass_parser import UnknownArgumentError
 @pai_dataclass
 @dataclass
 class Child:
-    s: str = ''
+    s: str = ""
 
 
 @pai_dataclass
@@ -17,73 +17,72 @@ class Child:
 class Base:
     i: int = 0
     c: Child = field(default_factory=Child)
-    d: Dict[str, Child] = field(default_factory=lambda: {'first': Child(), 'second': Child()})
+    d: Dict[str, Child] = field(default_factory=lambda: {"first": Child(), "second": Child()})
     l: List[Child] = field(default_factory=lambda: [Child(), Child()])
 
 
 class TestIgnore(unittest.TestCase):
     def test_primitive(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root'])
+        parser.add_root_argument("root", Base, ignore=["root"])
         with self.assertRaises(UnknownArgumentError):
-            parser.parse_args(['--root.i', '1']).root
+            parser.parse_args(["--root.i", "1"]).root
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.'])
+        parser.add_root_argument("root", Base, ignore=["root."])
         with self.assertRaises(UnknownArgumentError):
-            parser.parse_args(['--root.i', '1']).root
+            parser.parse_args(["--root.i", "1"]).root
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.i'])
+        parser.add_root_argument("root", Base, ignore=["root.i"])
         with self.assertRaises(UnknownArgumentError):
-            parser.parse_args(['--root.i', '1']).root
+            parser.parse_args(["--root.i", "1"]).root
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.s'])
-        base: Base = parser.parse_args(['--root.i', '1']).root
+        parser.add_root_argument("root", Base, ignore=["root.s"])
+        base: Base = parser.parse_args(["--root.i", "1"]).root
         self.assertEqual(base.i, 1)
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.c'])
+        parser.add_root_argument("root", Base, ignore=["root.c"])
         with self.assertRaises(UnknownArgumentError):
-            parser.parse_args(['--root.c.s', 'asdf']).root
+            parser.parse_args(["--root.c.s", "asdf"]).root
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.i'])
-        base: Base = parser.parse_args(['--root.c.s', 'asdf']).root
-        self.assertEqual(base.c.s, 'asdf')
+        parser.add_root_argument("root", Base, ignore=["root.i"])
+        base: Base = parser.parse_args(["--root.c.s", "asdf"]).root
+        self.assertEqual(base.c.s, "asdf")
 
     def test_dict(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.d.first'])
+        parser.add_root_argument("root", Base, ignore=["root.d.first"])
         with self.assertRaises(UnknownArgumentError):
-            parser.parse_args(['--root.d.first.s', 'asdf']).root
+            parser.parse_args(["--root.d.first.s", "asdf"]).root
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.i'])
-        base: Base = parser.parse_args(['--root.d.first.s', 'asdf']).root
-        self.assertEqual(base.d['first'].s, 'asdf')
+        parser.add_root_argument("root", Base, ignore=["root.i"])
+        base: Base = parser.parse_args(["--root.d.first.s", "asdf"]).root
+        self.assertEqual(base.d["first"].s, "asdf")
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.d.first'])
-        base: Base = parser.parse_args(['--root.d.second.s', 'asdf']).root
-        self.assertEqual(base.d['first'].s, '')
-        self.assertEqual(base.d['second'].s, 'asdf')
+        parser.add_root_argument("root", Base, ignore=["root.d.first"])
+        base: Base = parser.parse_args(["--root.d.second.s", "asdf"]).root
+        self.assertEqual(base.d["first"].s, "")
+        self.assertEqual(base.d["second"].s, "asdf")
 
     def test_list(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.l.0'])
+        parser.add_root_argument("root", Base, ignore=["root.l.0"])
         with self.assertRaises(UnknownArgumentError):
-            parser.parse_args(['--root.l.0.s', 'asdf']).root
+            parser.parse_args(["--root.l.0.s", "asdf"]).root
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.i'])
-        base: Base = parser.parse_args(['--root.l.0.s', 'asdf']).root
-        self.assertEqual(base.l[0].s, 'asdf')
+        parser.add_root_argument("root", Base, ignore=["root.i"])
+        base: Base = parser.parse_args(["--root.l.0.s", "asdf"]).root
+        self.assertEqual(base.l[0].s, "asdf")
 
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base, ignore=['root.l.0'])
-        base: Base = parser.parse_args(['--root.l.1.s', 'asdf']).root
-        self.assertEqual(base.l[0].s, '')
-        self.assertEqual(base.l[1].s, 'asdf')
-
+        parser.add_root_argument("root", Base, ignore=["root.l.0"])
+        base: Base = parser.parse_args(["--root.l.1.s", "asdf"]).root
+        self.assertEqual(base.l[0].s, "")
+        self.assertEqual(base.l[1].s, "asdf")

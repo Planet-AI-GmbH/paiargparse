@@ -25,7 +25,7 @@ class Base:
 class TestOptional(unittest.TestCase):
     def test_optionals(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base)
+        parser.add_root_argument("root", Base)
         base: Base = parser.parse_args([]).root
 
         self.assertIsNone(base.i1)
@@ -36,8 +36,10 @@ class TestOptional(unittest.TestCase):
 
     def test_optionals_args(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', Base)
-        base: Base = parser.parse_args(['--root.i1', '2', '--root.i2', 'None', '--root.sub2', 'Sub', '--root.sub1', 'None']).root
+        parser.add_root_argument("root", Base)
+        base: Base = parser.parse_args(
+            ["--root.i1", "2", "--root.i2", "None", "--root.sub2", "Sub", "--root.sub1", "None"]
+        ).root
 
         self.assertEqual(base.i1, 2)
         self.assertIsNone(base.i2)

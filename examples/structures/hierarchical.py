@@ -11,9 +11,9 @@ class IntEnumEx(IntEnum):
 
 
 class StrEnumEx(str, Enum):
-    A = 'test1'
-    B = 'test2'
-    C = 'test3'
+    A = "test1"
+    B = "test2"
+    C = "test3"
 
 
 @pai_dataclass
@@ -41,4 +41,4 @@ class Parent:
     enum: IntEnumEx = IntEnumEx.B
     str_enum: StrEnumEx = StrEnumEx.A
 
-    child: ChildBase = field(default_factory=Child1, metadata=pai_meta(help='Select the child'))
+    child: ChildBase = field(default_factory=Child1, metadata=pai_meta(help="Select the child"))

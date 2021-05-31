@@ -17,5 +17,3 @@ class ParamSet2:
     required_str_param: str
     int_param: int = 4
     float_param: float = 5.0
-
-

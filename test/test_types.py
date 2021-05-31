@@ -13,9 +13,9 @@ class IntEnumEx(IntEnum):
 
 
 class StrEnumEx(str, Enum):
-    A = 'test1'
-    B = 'test2'
-    C = 'test3'
+    A = "test1"
+    B = "test2"
+    C = "test3"
 
 
 @pai_dataclass
@@ -39,13 +39,17 @@ class DifferentTypes:
 class TestPAIParser(unittest.TestCase):
     def test_primitives(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DifferentTypes)
+        parser.add_root_argument("root", DifferentTypes)
         dt: DifferentTypes = parser.parse_args(
             [
-                '--root.i', '91',
-                '--root.f', '1.2',
-                '--root.b', 'True',
-                '--root.oi', '11',
+                "--root.i",
+                "91",
+                "--root.f",
+                "1.2",
+                "--root.b",
+                "True",
+                "--root.oi",
+                "11",
             ]
         ).root
         self.assertEqual(91, dt.i)
@@ -55,34 +59,42 @@ class TestPAIParser(unittest.TestCase):
 
     def test_enum(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DifferentTypes)
+        parser.add_root_argument("root", DifferentTypes)
         dt: DifferentTypes = parser.parse_args(
             [
-                '--root.int_enum', 'B',
-                '--root.str_enum', 'test2',
-             ]
+                "--root.int_enum",
+                "B",
+                "--root.str_enum",
+                "test2",
+            ]
         ).root
         self.assertEqual(IntEnumEx.B, dt.int_enum)
         self.assertEqual(StrEnumEx.B, dt.str_enum)
 
     def test_list(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DifferentTypes)
+        parser.add_root_argument("root", DifferentTypes)
         dt: DifferentTypes = parser.parse_args(
             [
-                '--root.int_list', '1', '2',
-                '--root.str_list', 'test1', 'test2',
+                "--root.int_list",
+                "1",
+                "2",
+                "--root.str_list",
+                "test1",
+                "test2",
             ]
         ).root
         self.assertEqual([1, 2], dt.int_list)
-        self.assertEqual(['test1', 'test2'], dt.str_list)
+        self.assertEqual(["test1", "test2"], dt.str_list)
 
     def test_enum_list(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DifferentTypes)
+        parser.add_root_argument("root", DifferentTypes)
         dt: DifferentTypes = parser.parse_args(
             [
-                '--root.int_enum_list', '0', 'B',
+                "--root.int_enum_list",
+                "0",
+                "B",
             ]
         ).root
         self.assertEqual([IntEnumEx.A, IntEnumEx.B], dt.int_enum_list)

@@ -15,10 +15,13 @@ class DCPrimitive:
 class TestDataClassList(unittest.TestCase):
     def test_primitive_set(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DCPrimitive)
+        parser.add_root_argument("root", DCPrimitive)
         dc: DCPrimitive = parser.parse_args(
             [
-                '--root.l', '0', '1', '0',
+                "--root.l",
+                "0",
+                "1",
+                "0",
             ]
         ).root
 
@@ -27,11 +30,8 @@ class TestDataClassList(unittest.TestCase):
 
     def test_primitive_set_default(self):
         parser = PAIArgumentParser()
-        parser.add_root_argument('root', DCPrimitive, DCPrimitive(dl={4, 5}))
-        dc: DCPrimitive = parser.parse_args(
-            [
-            ]
-        ).root
+        parser.add_root_argument("root", DCPrimitive, DCPrimitive(dl={4, 5}))
+        dc: DCPrimitive = parser.parse_args([]).root
 
         self.assertSetEqual(dc.l, set())
         self.assertSetEqual(dc.dl, {4, 5})

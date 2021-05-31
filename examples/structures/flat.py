@@ -18,12 +18,12 @@ class Child1(ChildBase):
 @pai_dataclass
 @dataclass
 class Child2(ChildBase):
-    p2: float = field(default=1, metadata=pai_meta(mode='ignore'))
+    p2: float = field(default=1, metadata=pai_meta(mode="ignore"))
 
 
 @pai_dataclass
 @dataclass
 class Parent:
-    req_int: int = field(metadata=pai_meta(mode='flat'))
+    req_int: int = field(metadata=pai_meta(mode="flat"))
 
-    child: ChildBase = field(default_factory=Child1, metadata=pai_meta(help='Select the child', mode='flat'))
+    child: ChildBase = field(default_factory=Child1, metadata=pai_meta(help="Select the child", mode="flat"))

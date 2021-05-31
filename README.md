@@ -282,3 +282,10 @@ Set the `metadata`-argument of `field` to `pai_meta` to enrich the information f
 | enforce_choices | `None` | Override the default choices checking. For dataclasses, it is permitted to select dataclasses that are not in choices, for primitive types they must be within choices | `pai_meta(enforce_choices=True)` |
 | fix_dc | `False` | Set to true to forbid overriding of a dataclass via the command line. | `pai_meta(fix_dc=True)` | 
 | tuple_like | `False` | This enables also to set values similar to tuples by passing a list to the dataclass argument instead of accessing all child arguments. Automatically sets "fix_dc" | `pai_meta(tuple_like=True)` | 
+
+
+## Development
+
+`paiargparse` uses [black](https://black.readthedocs.io) code style.
+Install the `development_requirements.txt` and run `pre-commit install` once to automatically run black on commits.
+To upgrade the `pre-commit` packages call `pre-commit autoupdate`.

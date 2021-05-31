@@ -5,24 +5,25 @@ from dataclasses_json import dataclass_json
 
 from paiargparse.dataclass_json_overrides import PaiDataClassMixin
 
-DEFAULT_SEPARATOR = '.'
+DEFAULT_SEPARATOR = "."
 
 
-def pai_meta(*,
-             help=None,
-             separator=DEFAULT_SEPARATOR,
-             mode='snake',
-             required=None,
-             nargs='*',
-             choices: List[Any] = None,
-             disable_subclass_check=False,
-             enforce_choices=None,  # if choices are dataclass, defaults to False, else True
-             fix_dc=False,  # if True, the dataclass can not be overwritten
-             tuple_like=False,  # if True, enable fix dc and enable to set values similar to tuples
-             ):
-    assert (separator in '/._-+')
-    assert (mode in {'snake', 'ignore', 'flat', 'ssnake'})
-    assert (nargs in {'*', '+'})
+def pai_meta(
+    *,
+    help=None,
+    separator=DEFAULT_SEPARATOR,
+    mode="snake",
+    required=None,
+    nargs="*",
+    choices: List[Any] = None,
+    disable_subclass_check=False,
+    enforce_choices=None,  # if choices are dataclass, defaults to False, else True
+    fix_dc=False,  # if True, the dataclass can not be overwritten
+    tuple_like=False,  # if True, enable fix dc and enable to set values similar to tuples
+):
+    assert separator in "/._-+"
+    assert mode in {"snake", "ignore", "flat", "ssnake"}
+    assert nargs in {"*", "+"}
     if choices is not None:
         data_class_choices = [cls.__name__ for cls in choices if is_dataclass(cls)]
         if len(set(data_class_choices)) != len(data_class_choices):
@@ -50,9 +51,11 @@ def set_attr_forbid_unknown(cls):
         if key not in self.__class__.__dataclass_fields__:
             raise AttributeError(
                 f"Class {self.__class__} has no attribute {key}. "
-                f"Available fields: {', '.join(self.__class__.__dataclass_fields__.keys())}")
+                f"Available fields: {', '.join(self.__class__.__dataclass_fields__.keys())}"
+            )
         else:
             return super(cls, self).__setattr__(key, value)
+
     return __setattr__
 
 
@@ -69,11 +72,11 @@ def pai_dataclass(_cls=None, alt=None, no_assign_to_unknown=True):
     """
 
     def wrap(cls):
-        setattr(cls, '__pai_dataclass__', None)  # Mark this class as a pai dataclass
-        setattr(cls, '__alt_name__', alt)
+        setattr(cls, "__pai_dataclass__", None)  # Mark this class as a pai dataclass
+        setattr(cls, "__alt_name__", alt)
         cls = _process_class(cls)
         if no_assign_to_unknown:
-            setattr(cls, '__setattr__', set_attr_forbid_unknown(cls))
+            setattr(cls, "__setattr__", set_attr_forbid_unknown(cls))
         return cls
 
     if _cls is None:
@@ -83,7 +86,7 @@ def pai_dataclass(_cls=None, alt=None, no_assign_to_unknown=True):
 
 def _process_class(cls):
     # apply dataclass_json, dataclass must be assigned manually for intellisense
-    assert (is_dataclass(cls))
+    assert is_dataclass(cls)
     cls = dataclass_json(cls)
 
     # override to dict and from dict

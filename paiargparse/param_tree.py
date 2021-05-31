@@ -16,7 +16,7 @@ class PAINode:
 class PAINodeDataClass(PAINode):
     parsed_type: Any  # MISSING if not specified, else the type specified from the cmd line, if None, the user set an (optional) value to None via the cmd line
     default_value: Any  # MISSING if not specified, the default of the 'field' attribute or overwritten by the user via the default arg in 'add_root_argument'
-    dcs: Dict[str, 'PAINodeDataClass'] = field(default_factory=dict)
+    dcs: Dict[str, "PAINodeDataClass"] = field(default_factory=dict)
     params: Dict[str, PAINode] = field(default_factory=dict)
 
     def all_param_values(self):

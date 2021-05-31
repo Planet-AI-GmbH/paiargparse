@@ -27,17 +27,15 @@ class ArgumentField:
             supported_types = {str}
             if self.type not in supported_types:
                 raise TypeError(
-                    f"If using a Dict[type, DataClass], type must be in {supported_types}, but got {self.type}")
+                    f"If using a Dict[type, DataClass], type must be in {supported_types}, but got {self.type}"
+                )
 
 
 def split_optional_type(t):
     if isinstance(t, type):
         return False, t
 
-    is_optional = (hasattr(t, "__args__")
-                   and len(t.__args__) == 2
-                   and t.__args__[-1] is type(None)
-                   )
+    is_optional = hasattr(t, "__args__") and len(t.__args__) == 2 and t.__args__[-1] is type(None)
     if is_optional:
         return True, t.__args__[0]
     else:
@@ -47,18 +45,12 @@ def split_optional_type(t):
 def split_list_type(ftype) -> Tuple[Optional[Union[Type[list], Type[set]]], Any]:
     if isinstance(ftype, type):
         return None, ftype
-    is_list = (hasattr(ftype, "__args__")
-               and len(ftype.__args__) == 1
-               and ftype._name == 'List'
-               )
+    is_list = hasattr(ftype, "__args__") and len(ftype.__args__) == 1 and ftype._name == "List"
 
     if is_list:
         return list, ftype.__args__[0]
 
-    is_set = (hasattr(ftype, "__args__")
-              and len(ftype.__args__) == 1
-              and ftype._name == 'Set'
-              )
+    is_set = hasattr(ftype, "__args__") and len(ftype.__args__) == 1 and ftype._name == "Set"
     if is_set:
         return set, ftype.__args__[0]
     else:
@@ -68,10 +60,7 @@ def split_list_type(ftype) -> Tuple[Optional[Union[Type[list], Type[set]]], Any]
 def split_dict_type(dtype):
     if isinstance(dtype, type):
         return dtype, None
-    is_dict = (hasattr(dtype, "__args__")
-               and len(dtype.__args__) == 2
-               and dtype._name == 'Dict'
-               )
+    is_dict = hasattr(dtype, "__args__") and len(dtype.__args__) == 2 and dtype._name == "Dict"
     if is_dict:
         return dtype.__args__
     else:
@@ -104,15 +93,15 @@ def arg_from_field(name, meta, field) -> ArgumentField:
     t, dict_type = split_dict_type(t)
     enum_class, t = split_enum_type(t)
     if isinstance(t, TypeVar):
-        if not hasattr(t, '__bound__'):
+        if not hasattr(t, "__bound__"):
             raise ValueError(f"A TypeVar must have field 'bound' set.")
         else:
             t = t.__bound__
 
     if dict_type:
-        is_dataclass = hasattr(dict_type, '__dataclass_fields__')
+        is_dataclass = hasattr(dict_type, "__dataclass_fields__")
     else:
-        is_dataclass = hasattr(t, '__dataclass_fields__')
+        is_dataclass = hasattr(t, "__dataclass_fields__")
 
     default = field.default
     if default == MISSING and field.default_factory != MISSING:
@@ -120,9 +109,18 @@ def arg_from_field(name, meta, field) -> ArgumentField:
 
     required = is_field_required(field)
 
-    return ArgumentField(name=name, type=t, meta=meta, optional=is_optional, list=is_list,
-                         dataclass=is_dataclass, enum=enum_class,
-                         default=default, required=required, dict_type=dict_type)
+    return ArgumentField(
+        name=name,
+        type=t,
+        meta=meta,
+        optional=is_optional,
+        list=is_list,
+        dataclass=is_dataclass,
+        enum=enum_class,
+        default=default,
+        required=required,
+        dict_type=dict_type,
+    )
 
 
 def is_field_required(field):
@@ -133,7 +131,7 @@ def extract_args_of_dataclass(dc, exclude_ignored=True) -> List[ArgumentField]:
     args = []
     for name, field in dc.__dataclass_fields__.items():
         meta: dict = field.metadata
-        if exclude_ignored and meta.get('mode', 'snake') == 'ignore':
+        if exclude_ignored and meta.get("mode", "snake") == "ignore":
             continue
 
         arg = arg_from_field(name, meta, field)
@@ -160,4 +158,4 @@ def str_to_enum(v: str, enum_cls: Type[Enum], enum_type):
 
 
 def str_to_bool(v: str) -> bool:
-    return (v.lower() in {'true', 'y', 'yes'}) or (v.isdigit() and int(v) > 0)
+    return (v.lower() in {"true", "y", "yes"}) or (v.isdigit() and int(v) > 0)

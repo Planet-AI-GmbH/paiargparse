@@ -15,34 +15,39 @@ class PAIArgumentParser(ArgumentParser):
     Call `add_root_argument("arg", DataClass)` to add a dataclass to the arguments
     """
 
-    def __init__(self,
-                 add_help=True,
-                 add_show=True,
-                 formatter_class=ArgumentDefaultsHelpFormatter,
-                 ignore_required=False,
-                 root_parser: 'PAIArgumentParser' = None,
-                 allow_abbrev=False,
-                 *args, **kwargs):
-        super(PAIArgumentParser, self).__init__(add_help=False, formatter_class=formatter_class,
-                                                allow_abbrev=allow_abbrev, *args, **kwargs)
+    def __init__(
+        self,
+        add_help=True,
+        add_show=True,
+        formatter_class=ArgumentDefaultsHelpFormatter,
+        ignore_required=False,
+        root_parser: "PAIArgumentParser" = None,
+        allow_abbrev=False,
+        *args,
+        **kwargs,
+    ):
+        super(PAIArgumentParser, self).__init__(
+            add_help=False, formatter_class=formatter_class, allow_abbrev=allow_abbrev, *args, **kwargs
+        )
         self.root_parser = root_parser if root_parser else self
         self._all_actions = []
         self._add_help = add_help  # store if help should be set
         self._add_show = add_show
 
         self._data_class_parser = self._data_class_argument_parser_cls()(
-            add_help=False, formatter_class=formatter_class, ignore_required=ignore_required,
-            allow_abbrev=allow_abbrev)
+            add_help=False, formatter_class=formatter_class, ignore_required=ignore_required, allow_abbrev=allow_abbrev
+        )
 
         # Register the custom subparser that stores the root parser
-        self._registries['action']['parsers'] = partial(_SubParsersActionWithRoot, root_parser=self.root_parser)
-        self.register('action', 'show', _ShowParametersAction)
+        self._registries["action"]["parsers"] = partial(_SubParsersActionWithRoot, root_parser=self.root_parser)
+        self.register("action", "show", _ShowParametersAction)
 
     def _data_class_argument_parser_cls(self) -> Type[PAIDataClassArgumentParser]:
         return PAIDataClassArgumentParser
 
-    def add_root_argument(self, param_name: str, dc_type: Any, default: Any = MISSING, ignore: List[str] = None,
-                          flat=False):
+    def add_root_argument(
+        self, param_name: str, dc_type: Any, default: Any = MISSING, ignore: List[str] = None, flat=False
+    ):
         self._data_class_parser.add_root_argument(param_name, dc_type, default, ignore=ignore, flat=flat)
 
     def parse_known_args(self, args=None, namespace=None):
@@ -64,19 +69,13 @@ class PAIArgumentParser(ArgumentParser):
 
         if self._add_show:
             # add help as last
-            self.add_argument(
-                '--show',
-                action='show', default=SUPPRESS,
-                help='show the parsed parameters')
-            if len(args) > 0 and args[0] in {'--show'}:
+            self.add_argument("--show", action="show", default=SUPPRESS, help="show the parsed parameters")
+            if len(args) > 0 and args[0] in {"--show"}:
                 return super(PAIArgumentParser, self).parse_known_args(args, namespace)
         if self._add_help:
             # add help as last
-            self.add_argument(
-                '-h', '--help',
-                action='help', default=SUPPRESS,
-                help='show this help message and exit')
-            if len(args) > 0 and args[0] in {'-h', '--help'}:
+            self.add_argument("-h", "--help", action="help", default=SUPPRESS, help="show this help message and exit")
+            if len(args) > 0 and args[0] in {"-h", "--help"}:
                 return super(PAIArgumentParser, self).parse_known_args(args, namespace)
 
         if exception:
@@ -89,8 +88,8 @@ class PAIArgumentParser(ArgumentParser):
         args, argv = self.parse_known_args(args, namespace)
         if argv:
             # unknown arguments, but search for nearest matches
-            alt_actions = find_alt_actions([a for a in argv if a.startswith('--')], self._all_actions)
-            help_str = ['\n' + f'\t{arg}. Alternative: {alt}' for arg, alt in zip(argv, alt_actions)]
+            alt_actions = find_alt_actions([a for a in argv if a.startswith("--")], self._all_actions)
+            help_str = ["\n" + f"\t{arg}. Alternative: {alt}" for arg, alt in zip(argv, alt_actions)]
             raise UnknownArgumentError(f"Unknown Arguments {' '.join(argv)}. Possible alternatives:{''.join(help_str)}")
         return args
 
@@ -105,8 +104,7 @@ class PAIArgumentParser(ArgumentParser):
         formatter = self._get_formatter()
 
         # usage
-        formatter.add_usage(self.usage, self._actions,
-                            self._mutually_exclusive_groups)
+        formatter.add_usage(self.usage, self._actions, self._mutually_exclusive_groups)
 
         # description
         formatter.add_text(self.description)
@@ -132,7 +130,7 @@ def find_alt_actions(argv: List[str], actions) -> List[str]:
     """
     all_option_strings = sum([a.option_strings for a in actions], [])
     if len(all_option_strings) == 0:
-        return ['No alternative available.'] * len(argv)
+        return ["No alternative available."] * len(argv)
 
     distances = [[(option, editdistance.eval(arg, option)) for option in all_option_strings] for arg in argv]
     for distance in distances:

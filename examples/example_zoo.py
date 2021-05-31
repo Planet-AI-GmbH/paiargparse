@@ -19,10 +19,10 @@ class Animal(ABC):
 @pai_dataclass
 @dataclass
 class Dog(Animal):
-    color: str = 'black'
+    color: str = "black"
 
     def make_sound(self):
-        if self.color == 'brown':
+        if self.color == "brown":
             print(f"{self.name}: Woof, woof")
         else:
             print(f"{self.name}: Woof")
@@ -54,9 +54,9 @@ class Zoo:
             animal.make_sound()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = PAIArgumentParser()
-    parser.add_root_argument('zoo', Zoo)
+    parser.add_root_argument("zoo", Zoo)
     args = parser.parse_args()
     zoo: Zoo = args.zoo
     zoo.sound()
