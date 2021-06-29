@@ -109,7 +109,7 @@ def _decode_dataclass(cls, kvs, infer_missing):
     return cls(**init_kwargs)
 
 
-def _asdict(obj, encode_json=False):
+def _asdict(obj, encode_json=False, include_cls=True):
     """
     A re-implementation of `asdict` (based on the original in the `dataclasses`
     source) to support arbitrary Collection and Mapping types.
@@ -123,7 +123,7 @@ def _asdict(obj, encode_json=False):
         result = _handle_undefined_parameters_safe(cls=obj, kvs=dict(result), usage="to")
 
         # >>> INSERTED HERE
-        if hasattr(obj.__class__, "__pai_dataclass__"):
+        if include_cls and hasattr(obj.__class__, "__pai_dataclass__"):
             result = dict(result)
             result["__cls__"] = obj.__class__.__module__ + ":" + obj.__class__.__name__
         # <<< END
@@ -142,8 +142,8 @@ class PaiDataClassMixin(ABC):
         # Use custom _decode_dataclass with fixed types
         return _decode_dataclass(cls, kvs, infer_missing)
 
-    def to_dict(self, encode_json=False) -> Dict[str, Json]:
-        d = _asdict(self, encode_json=encode_json)
+    def to_dict(self, encode_json=False, include_cls=True) -> Dict[str, Json]:
+        d = _asdict(self, encode_json=encode_json, include_cls=include_cls)
         return d
 
 
