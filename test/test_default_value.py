@@ -25,8 +25,10 @@ class TestPAIParserDefault(unittest.TestCase):
     def test_setting_argument_after_override(self):
         parser = PAIArgumentParser()
         parser.add_root_argument("arg", Level1Base, default=Level1b(p1=-1))
-        with self.assertRaises(UnknownArgumentError):
+        with self.assertRaises(UnknownArgumentError) as e:
             parser.parse_args(args=["--arg.l.p1", "-13"])
+
+        self.assertIn("--arg.l.p1 ==> --arg.p1", e.exception.args[0], "Check for correct UnknownArgumentError message")
 
     def test_setting_second_level(self):
         parser = PAIArgumentParser()

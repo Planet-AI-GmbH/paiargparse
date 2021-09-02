@@ -88,8 +88,8 @@ class PAIArgumentParser(ArgumentParser):
         args, argv = self.parse_known_args(args, namespace)
         if argv:
             # unknown arguments, but search for nearest matches
-            alt_actions = find_alt_actions([a for a in argv if a.startswith("--")], self._all_actions)
-            help_str = ["\n" + f"\t{arg}. Alternative: {alt}" for arg, alt in zip(argv, alt_actions)]
+            alt_actions = find_alt_actions([a for a in argv if a.startswith("--")], self._all_actions, n_best=3)
+            help_str = ["\n" + f"\t{arg} ==> {', '.join(alt)}" for arg, alt in zip(argv, alt_actions)]
             raise UnknownArgumentError(f"Unknown Arguments {' '.join(argv)}. Possible alternatives:{''.join(help_str)}")
         return args
 
@@ -123,7 +123,26 @@ class PAIArgumentParser(ArgumentParser):
         return formatter.format_help()
 
 
-def find_alt_actions(argv: List[str], actions) -> List[str]:
+def _find_most_common_options(arg: str, all_option_strings: List[str]) -> List[str]:
+    """Filter commands that (after splitting at '.' have the most common parts)
+
+    e.g. arg="test.cmd.1" and all_option_string=["test.cmd.12" and "test.asdf.fasdf.asdf"] will only return "test.cmd.12"
+    """
+    cmd1 = set(arg.split("."))
+
+    all_common_cmds = []
+    max_common_cnt = 0
+    for option_string in all_option_strings:
+        cmd2 = set(option_string.split("."))
+        common_cmds = cmd1.intersection(cmd2)
+        all_common_cmds.append((option_string, common_cmds))
+        max_common_cnt = max(max_common_cnt, len(common_cmds))
+
+    # also allow max_comon_cnt -1 to add a bit more variance
+    return [option_string for option_string, common_cmds in all_common_cmds if len(common_cmds) >= max_common_cnt - 1]
+
+
+def find_alt_actions(argv: List[str], actions, n_best=1) -> List[str]:
     """
     Find alternative actions for a given list of args.
     Note, argv should only contain "--" args
@@ -132,11 +151,14 @@ def find_alt_actions(argv: List[str], actions) -> List[str]:
     if len(all_option_strings) == 0:
         return ["No alternative available."] * len(argv)
 
-    distances = [[(option, editdistance.eval(arg, option)) for option in all_option_strings] for arg in argv]
+    distances = [
+        [(option, editdistance.eval(arg, option)) for option in _find_most_common_options(arg, all_option_strings)]
+        for arg in argv
+    ]
     for distance in distances:
         distance.sort(key=lambda x: x[1])
 
-    return [s[0][0] for s in distances]
+    return [[x[0] for x in s[:n_best]] for s in distances]
 
 
 class _SubParsersActionWithRoot(_SubParsersAction):

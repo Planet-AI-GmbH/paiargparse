@@ -1,2 +1,2 @@
-dataclasses_json==0.5.4
+dataclasses_json==0.5.5
 editdistance
