@@ -1,3 +1,7 @@
+"""Changes to dataclass_json.
+
+This code inserts the support for the __cls__ field to define the type of a dataclass.
+"""
 import copy
 import importlib
 import warnings

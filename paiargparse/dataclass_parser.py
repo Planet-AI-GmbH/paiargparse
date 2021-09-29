@@ -34,6 +34,11 @@ def is_none(v: Union[List[str], str]) -> bool:
 
 
 def type_to_str(t, separator=":"):
+    """convert a type, e.g. a class to its unique module name.
+
+    Constructed by default as:
+        PATH_TO_MODULE:CLASS_NAME
+    """
     return f"{t.__module__}{separator}{t.__name__}"
 
 

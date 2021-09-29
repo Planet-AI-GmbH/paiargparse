@@ -32,7 +32,7 @@ class PAIArgumentParser(ArgumentParser):
         self.root_parser = root_parser if root_parser else self
         self._all_actions = []
         self._add_help = add_help  # store if help should be set
-        self._add_show = add_show
+        self._add_show = add_show  # store if show should be added as valid command
 
         self._data_class_parser = self._data_class_argument_parser_cls()(
             add_help=False, formatter_class=formatter_class, ignore_required=ignore_required, allow_abbrev=allow_abbrev
@@ -143,8 +143,8 @@ def _find_most_common_options(arg: str, all_option_strings: List[str]) -> List[s
 
 
 def find_alt_actions(argv: List[str], actions, n_best=1) -> List[str]:
-    """
-    Find alternative actions for a given list of args.
+    """Find alternative actions for a given list of args.
+
     Note, argv should only contain "--" args
     """
     all_option_strings = sum([a.option_strings for a in actions], [])
@@ -162,9 +162,7 @@ def find_alt_actions(argv: List[str], actions, n_best=1) -> List[str]:
 
 
 class _SubParsersActionWithRoot(_SubParsersAction):
-    """
-    Override SubParsers action to store the root parsers and pass it to PAIArgParser on construction (add_parse)
-    """
+    """Override SubParsers action to store the root parsers and pass it to PAIArgParser on construction (add_parse)"""
 
     def __init__(self, *args, root_parser, **kwargs):
         super(_SubParsersActionWithRoot, self).__init__(*args, **kwargs)
@@ -175,6 +173,8 @@ class _SubParsersActionWithRoot(_SubParsersAction):
 
 
 class _ShowParametersAction(Action):
+    """Action to show the parsed and default values as json and as list."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, nargs=0, **kwargs)
 

@@ -21,6 +21,26 @@ def pai_meta(
     fix_dc=False,  # if True, the dataclass can not be overwritten
     tuple_like=False,  # if True, enable fix dc and enable to set values similar to tuples
 ):
+    """Meta information for a dataclass field.
+
+    Arguments:
+        help: string to show in the help of the command line
+        separator: separator for this argument, by default a dot
+        mode: how to concatenate this argument with its parent.
+            snake (default): concatenate all parents with the separator
+            ingnore: Do not show this argument in the command line at all
+            flat: Add this argument as a root argument (no parents)
+            ssnake: (short snake), only concatenate the name with the direct parent.
+            required: (default None), override if this argument is required to specify from the command line, even if a default value is set.
+            nargs: (default '*'), if '*', 0 arguments are legit, if '+', at least one argument must be passed to a List/Set
+            choices: only allow the given values (consider using an enumeration instead of choices!)
+            disable_subclass_check: (default false) Disable the check for a dataclass argument if the provided class is a subclass of the type.
+            enforce_choices: Force that the choices must be matched. For dataclasses this is False by default, since the sub class might be derived. See also disable_subclass_check
+            fix_dc: (applies only to dataclass fields) force that the type of the dataclass field must not be changed.
+            typle_like: allow to set the fields of a dataclass as tuples (see README.md for usage)
+
+    see also dataclass_json metadata for addtional options, e.g. for encoding and decoding to a dict/json
+    """
     assert separator in "/._-+"
     assert mode in {"snake", "ignore", "flat", "ssnake"}
     assert nargs in {"*", "+"}
@@ -47,6 +67,8 @@ def pai_meta(
 
 
 def set_attr_forbid_unknown(cls):
+    """Override the __setattr__ method of a dataclass `cls` to forbid setting fields that do not exist in `cls`"""
+
     def __setattr__(self, key, value):
         if key not in self.__class__.__dataclass_fields__:
             raise AttributeError(
