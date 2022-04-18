@@ -28,7 +28,7 @@ def pai_meta(
         separator: separator for this argument, by default a dot
         mode: how to concatenate this argument with its parent.
             snake (default): concatenate all parents with the separator
-            ingnore: Do not show this argument in the command line at all
+            ignore: Do not show this argument in the command line at all
             flat: Add this argument as a root argument (no parents)
             ssnake: (short snake), only concatenate the name with the direct parent.
             required: (default None), override if this argument is required to specify from the command line, even if a default value is set.
@@ -39,7 +39,7 @@ def pai_meta(
             fix_dc: (applies only to dataclass fields) force that the type of the dataclass field must not be changed.
             typle_like: allow to set the fields of a dataclass as tuples (see README.md for usage)
 
-    see also dataclass_json metadata for addtional options, e.g. for encoding and decoding to a dict/json
+    see also dataclass_json metadata for additional options, e.g. for encoding and decoding to a dict/json
     """
     assert separator in "/._-+"
     assert mode in {"snake", "ignore", "flat", "ssnake"}

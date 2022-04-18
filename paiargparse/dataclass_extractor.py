@@ -183,7 +183,7 @@ def split_enum_type(etype):
     try:
         is_enum = issubclass(etype, Enum)
     except TypeError:
-        # etype is not a type, cant be enum
+        # etype is not a type, can't be enum
         return None, etype
 
     if not is_enum:

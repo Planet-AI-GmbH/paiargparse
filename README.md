@@ -241,7 +241,7 @@ Have a look at the various [tests](test) for additional examples.
 
 ## Exporting/Importing to dict/json
 
-Since a `pai_dataclass` inherits `dataclass_json`, a dataclass can be writting into a dict and json and read back while preserving the actual types of dataclasses.
+Since a `pai_dataclass` inherits `dataclass_json`, a dataclass can be writing into a dict and json and read back while preserving the actual types of dataclasses.
 This is achieved by an additional `__cls__` field which is added to each `pai_dataclass`. For example:
 ```python
 @pai_dataclass

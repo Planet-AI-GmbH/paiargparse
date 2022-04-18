@@ -1,6 +1,6 @@
 """Tree structure that will be filled upon parsing the command line args.
 
-The arguments are constructed parallel to the hierarchie of the parsed dataclass fields.
+The arguments are constructed parallel to the hierarchy of the parsed dataclass fields.
 """
 from dataclasses import dataclass, field, MISSING
 from typing import Any, Dict
